@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "amlak-ahmadr59",
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}
