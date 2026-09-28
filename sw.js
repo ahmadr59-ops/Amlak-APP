@@ -1,5 +1,5 @@
 // «املاک» service worker — bump CACHE with every release (matches APP_VERSION).
-const CACHE = 'amlak-v1-0';
+const CACHE = 'amlak-v1-1';
 const FILES = ['./','./index.html','./manifest.json','./icon-32.png','./icon-152.png','./icon-167.png','./icon-180.png',
   './icon-192.png','./icon-512.png','./icon-192-maskable.png','./icon-512-maskable.png'];
 self.addEventListener('install', e => {

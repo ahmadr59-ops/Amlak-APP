@@ -206,7 +206,7 @@ html[data-theme="dark"] #toast{background:#2A3A5C}
 //   • Guarantee cheques are never payments.
 //   • Partner settlement is on a CASH basis per Jalali year.
 // ============================================================
-const APP_VERSION='v1.0';
+const APP_VERSION='v1.1';
 const FA='۰۱۲۳۴۵۶۷۸۹';
 const MFA=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const MSH=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -263,7 +263,7 @@ function def(){return{
   schemaVersion:1,
   properties:[],tenants:[],contracts:[],payments:[],cheques:[],settlements:[],
   settings:{remindDays:2,smsTpl:DEFAULT_SMS,theme:'auto',lastBackup:null},
-  dismissed:{}
+  dismissed:{},bridge:[],bridgeDone:{}
 };}
 let ST=def();
 // Defaults only FILL missing keys; saved values always win (schemaVersion explicit).
@@ -272,6 +272,8 @@ function normalize(s){
   o.settings=Object.assign(def().settings,(s&&s.settings)||{});
   ['properties','tenants','contracts','payments','cheques','settlements'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
   if(!o.dismissed||typeof o.dismissed!=='object') o.dismissed={};
+  if(!Array.isArray(o.bridge)) o.bridge=[];
+  if(!o.bridgeDone||typeof o.bridgeDone!=='object') o.bridgeDone={};
   o.schemaVersion=(s&&s.schemaVersion)||1;
   return o;
 }
@@ -497,6 +499,18 @@ function importSarmaye(data){
   return{state:S,rec:{src,dst,ok,skipped}};
 }
 
+// ---------------- Bridge from «سرمایه» (rent deposits detected in bank SMS) ----------------
+// Rank active contracts for an incoming amount: exact arrears match, then exact
+// next-due match, then exact current rent, then the rest.
+function bridgeCandidates(amount,asOf){
+  return activeContracts().map(c=>{
+    const L=ledger(c,asOf);const next=L.charges.find(x=>x.paid<x.amount);
+    const nextDue=next?next.amount-next.paid:0;
+    const score=(L.balance===amount?3:0)+(nextDue===amount?2:0)+(currentRent(c)===amount?1:0);
+    return{c,score,balance:L.balance,nextDue};
+  }).sort((a,b)=>b.score-a.score||b.balance-a.balance);
+}
+
 // ============================================================
 // UI LAYER
 // ============================================================
@@ -588,6 +602,8 @@ function vToday(){
     <div class="meter"><span style="width:${pct}%"></span></div>
     <p class="hero-s">اجارهٔ ${MFA[t.m]}: <b>${nf(mGot)}</b> از ${nf(mExp)} وصول شده (${toFa(pct)}٪)</p>
   </section>
+  ${(ST.bridge||[]).length?`<h3 class="sec">واریزهای ارسالی از «سرمایه»</h3><div class="list">${ST.bridge.map(b=>`<div class="row"><span class="ri r-ok">${svg('upcoming')}</span><div class="rb"><b>${nf(b.a)} تومان</b><small>${esc(b.bank||'')}${b.acc?'، '+esc(b.acc):''}، ${fmtD(b.date)}</small></div>
+    <div class="ra"><button class="mini ok" onclick="openBridge('${b.id}')">ثبت برای مستأجر</button><button class="dis" onclick="bridgeResolve('${b.id}',null)" aria-label="نادیده">✕</button></div></div>`).join('')}</div>`:''}
   <h3 class="sec">نیاز به اقدام</h3>
   ${items.length?`<div class="list">${items.map(itemRow).join('')}</div>`:`<p class="calm">موردی برای امروز نیست.</p>`}
   ${soon.length?`<h3 class="sec">چک‌های ۳۰ روز آینده</h3><div class="list">${soon.map(q=>{const c=ctrOf(q.contractId);return `<div class="row"><span class="ri r-chq">${svg('cheque')}</span><div class="rb"><b>${nf(q.amount)} تومان</b><small>${esc(tenName(c))}، سررسید ${fmtD(q.due)}</small></div></div>`;}).join('')}</div>`:''}
@@ -1024,6 +1040,17 @@ async function boot(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 
+// ---------------- Bridge sheet ----------------
+function openBridge(id){
+  const b=(ST.bridge||[]).find(x=>x.id===id);if(!b)return;
+  const C=bridgeCandidates(b.a);
+  if(!C.length)return ntf('قرارداد فعالی وجود ندارد');
+  openSheet(`${sheetHead('ثبت واریز '+nf(b.a)+' تومان',esc(b.bank||'')+'، '+fmtD(b.date))}
+  <p class="dim">این مبلغ پرداخت کدام مستأجر است؟ موارد هم‌مبلغ در بالای فهرست آمده‌اند.</p>
+  <div class="list">${C.map(x=>`<button class="row tap" onclick="bridgeResolve('${b.id}','${x.c.id}')"><div class="rb"><b>${esc(tenName(x.c))}${x.score>=2?' <span class="chip ok">هم‌مبلغ</span>':''}</b><small>${esc(propName(x.c))}، ${x.balance>0?'معوق '+nf(x.balance):'بدون معوق'}، اجاره ${nf(currentRent(x.c))}</small></div></button>`).join('')}</div>
+  <button class="btn" onclick="bridgeResolve('${b.id}',null)">مربوط به اجاره نیست (نادیده)</button>`);
+}
+
 // ============================================================
 // CLOUD BACKUP (Firebase) — same project & same account as «سرمایه».
 // Storage: amlak_backups/{uid}. If the project's Firestore rules only
@@ -1047,7 +1074,8 @@ async function initFirebase(){
     }
     if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
     fbAuth=firebase.auth();fbDb=firebase.firestore();fbReady=true;
-    fbAuth.onAuthStateChanged(u=>{if(u)cloudBackup(true);refreshCloudUI();});
+    fbAuth.onAuthStateChanged(u=>{if(u){cloudBackup(true);fetchBridge();}refreshCloudUI();});
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&cloudUser())fetchBridge();});
     fbAuth.getRedirectResult().catch(()=>{});
     return true;
   }catch(e){fbReady=false;return false;}
@@ -1127,6 +1155,29 @@ function cloudSection(){
     <button class="btn" onclick="cloudSignOut()">خروج از حساب</button>`;
 }
 function refreshCloudUI(){const b=$('cloudbox');if(b)b.innerHTML=cloudSection();const l=$('hcloud');if(l)l.classList.toggle('on',!!cloudUser());}
+
+// Read rent deposits that «سرمایه» forwarded (backups/{uid}.amlakInbox), skip handled ones.
+async function fetchBridge(){
+  if(!cloudUser())return 0;
+  try{
+    const d=await fbDb.collection('backups').doc(cloudUser().uid).get();
+    const inbox=(d.exists&&d.data().amlakInbox)||{};
+    const fresh=Object.values(inbox).filter(it=>it&&it.id&&!ST.bridgeDone[it.id]&&!(ST.bridge||[]).some(b=>b.id===it.id));
+    if(!fresh.length)return 0;
+    ST.bridge=(ST.bridge||[]).concat(fresh).sort((a,b)=>cmpD(a.date,b.date));
+    await sv(true);if(TAB==='today')render();ntf(`🏦 ${toFa(fresh.length)} واریز جدید از «سرمایه»`);
+    return fresh.length;
+  }catch(e){return 0;}
+}
+async function bridgeResolve(id,contractId){
+  const b=(ST.bridge||[]).find(x=>x.id===id);if(!b)return;
+  try{
+    if(contractId) addPayment({contractId,amount:b.a,date:b.date,method:'transfer',note:'پیامک '+(b.bank||'بانک')});
+    ST.bridgeDone[id]=Date.now();ST.bridge=ST.bridge.filter(x=>x.id!==id);
+    await sv();closeSheet();render();ntf(contractId?'پرداخت ثبت شد':'نادیده گرفته شد');
+    if(cloudUser()) fbDb.collection('backups').doc(cloudUser().uid).update({['amlakInbox.'+id]:firebase.firestore.FieldValue.delete()}).catch(()=>{});
+  }catch(e){ntf(e.message);}
+}
 
 </script>
 </body>
