@@ -12,7 +12,8 @@
 <link rel="icon" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=Lalezar&display=swap');
+@font-face{font-family:'Vazirmatn';src:url('Vazirmatn.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'Lalezar';src:url('Lalezar.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
 :root{
   --ink:#15243F;--ink2:#22395F;--brass:#B8903F;--brass-l:#F4EAD3;
   --paper:#F2F3F5;--card:#FFFFFF;--line:#E2E5EB;--t1:#16202E;--t2:#56617A;--t3:#8C95A8;
@@ -206,7 +207,7 @@ html[data-theme="dark"] #toast{background:#2A3A5C}
 //   • Guarantee cheques are never payments.
 //   • Partner settlement is on a CASH basis per Jalali year.
 // ============================================================
-const APP_VERSION='v1.1';
+const APP_VERSION='v1.2';
 const FA='۰۱۲۳۴۵۶۷۸۹';
 const MFA=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const MSH=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -531,6 +532,7 @@ async function sv(noCloud){
   const snap=JSON.parse(JSON.stringify(ST));
   try{await dbSet('state',snap);}catch(e){try{localStorage.setItem('amlak_state',JSON.stringify(snap));}catch(_){ntf('ذخیره انجام نشد');}}
   if(!noCloud&&typeof scheduleCloud==='function') scheduleCloud();
+  if(typeof ghSchedule==='function') ghSchedule();
 }
 
 // ---------------- Small UI helpers ----------------
@@ -594,7 +596,7 @@ function vToday(){
   const pct=mExp?Math.min(100,Math.round(mGot/mExp*100)):0;
   const items=reminders(t);
   const soon=ST.cheques.filter(q=>(q.status==='pending')&&dayNum(q.due)-dayNum(t)>(ST.settings.remindDays||0)&&dayNum(q.due)-dayNum(t)<=30).sort((a,b)=>cmpD(a.due,b.due));
-  const lb=Math.max(ST.settings.lastBackup||0,ST.settings.lastCloud||0);const stale=!lb||(Date.now()-lb)>14*864e5;
+  const lb=Math.max(ST.settings.lastBackup||0,ST.settings.lastCloud||0,+(localStorage.getItem('amlak_gh_last')||0));const stale=!lb||(Date.now()-lb)>14*864e5;
   return `
   <section class="hero">
     <p class="hero-l">مطالبات معوق</p>
@@ -972,7 +974,8 @@ function openSettings(){
   ${field('یادآوری چند روز قبل',`<input id="st_rd" inputmode="numeric" value="${toFa(s.remindDays)}">`)}</div>
   ${field('متن پیامک یادآوری',`<textarea id="st_sms" rows="4">${esc(s.smsTpl)}</textarea>`,'جایگزین‌ها: {نام} {ملک} {مبلغ} {ماه} {سررسید} {وضعیت}')}
   <button class="btn pri" onclick="saveSettings()">ذخیرهٔ تنظیمات</button>
-  <div class="divider"></div><h3 class="sec m0">پشتیبان ابری</h3><div id="cloudbox">${cloudSection()}</div>
+  <div class="divider"></div><h3 class="sec m0">پشتیبان GitHub (بدون VPN)</h3><p class="dim" id="gh-status">${ghStatusText()}</p><button class="btn" onclick="openGhSheet()">تنظیم پشتیبان GitHub</button>
+  <div class="divider"></div><h3 class="sec m0">پشتیبان ابری Firebase (نیاز به VPN)</h3><div id="cloudbox">${cloudSection()}</div>
   <div class="divider"></div><h3 class="sec m0">یادآور در تقویم گوشی</h3>
   <p class="dim">سررسید اجاره‌ها و چک‌های ۱۲ ماه آینده با هشدار به تقویم گوشی اضافه می‌شود؛ حتی وقتی برنامه بسته است یادآوری می‌کند. بعد از هر تغییر مهم، دوباره اضافه کنید.</p>
   <button class="btn" onclick="exportICS()">افزودن سررسیدها به تقویم</button>
@@ -1034,7 +1037,8 @@ async function boot(){
   if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(ST.settings.theme==='auto')applyTheme();});
   const t=today();$('hdate').textContent=`${t.wd||''} ${fmtD(t)}`;
   render();
-  setTimeout(()=>{initFirebase().then(refreshCloudUI);},300);
+  setTimeout(()=>{initFirebase().then(refreshCloudUI);},1500);
+  setTimeout(()=>{if(ghOn()&&(Date.now()-(+localStorage.getItem(GH_LAST)||0))>6*3600e3)ghBackup(true);},6000);
   if('serviceWorker' in navigator&&location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
@@ -1178,6 +1182,71 @@ async function bridgeResolve(id,contractId){
     if(cloudUser()) fbDb.collection('backups').doc(cloudUser().uid).update({['amlakInbox.'+id]:firebase.firestore.FieldValue.delete()}).catch(()=>{});
   }catch(e){ntf(e.message);}
 }
+
+
+// ============================================================
+// GITHUB PRIVATE-REPO BACKUP (reachable in Iran without VPN)
+// Same repo/token as «سرمایه» works (different file). Config is device-only
+// (localStorage) — never inside ST or any backup. Each backup = one commit.
+// ============================================================
+const GH_KEY='amlak_gh_cfg',GH_LAST='amlak_gh_last',GH_FILE='amlak-backup.json';
+let ghTimer=null,ghBusy=false;
+function ghCfg(){try{return JSON.parse(localStorage.getItem(GH_KEY)||'{}')||{};}catch(e){return{};}}
+function ghOn(){const c=ghCfg();return !!(c.owner&&c.repo&&c.token);}
+const b2s=b=>{let s='';const u=new Uint8Array(b);for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s);};
+const s2b=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function ghKey(pass,salt,use){const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),{name:'PBKDF2'},false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:50000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,[use]);}
+async function ghEnc(obj,pass){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await ghKey(pass,salt,'encrypt'),new TextEncoder().encode(JSON.stringify(obj)));
+  return{amlakEnc:1,salt:b2s(salt),iv:b2s(iv),data:b2s(ct)};}
+async function ghDec(e,pass){const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:s2b(e.iv)},await ghKey(pass,s2b(e.salt),'decrypt'),s2b(e.data));return JSON.parse(new TextDecoder().decode(pt));}
+function ghFetch(path,opt){const c=ghCfg();opt=opt||{};
+  const h={'Authorization':'Bearer '+c.token,'Accept':opt.accept||'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};if(opt.body)h['Content-Type']='application/json';
+  return fetch('https://api.github.com/repos/'+encodeURIComponent(c.owner)+'/'+encodeURIComponent(c.repo)+path,{method:opt.method||'GET',cache:'no-store',headers:h,body:opt.body});}
+function ghErr(r){return r.status===401?'توکن نامعتبر یا منقضی است':r.status===403?'توکن اجازهٔ نوشتن در این ریپو را ندارد':r.status===404?'ریپو پیدا نشد یا توکن به آن دسترسی ندارد':'خطای GitHub ('+r.status+')';}
+async function ghBackup(silent){
+  if(!ghOn()||ghBusy)return false;ghBusy=true;const c=ghCfg();
+  try{const payload=JSON.stringify(c.pass?await ghEnc(ST,c.pass):ST);
+    let sha;const g=await ghFetch('/contents/'+GH_FILE);if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)throw new Error(ghErr(g));
+    const t=today();const p=await ghFetch('/contents/'+GH_FILE,{method:'PUT',body:JSON.stringify({message:`املاک ${t.y}/${t.m+1}/${t.d} ${new Date().toTimeString().slice(0,5)} — ${APP_VERSION}`,content:b2s(new TextEncoder().encode(payload)),sha})});
+    if(!p.ok)throw new Error(ghErr(p));
+    localStorage.setItem(GH_LAST,String(Date.now()));const el=$('gh-status');if(el)el.textContent=ghStatusText();
+    if(!silent)ntf('پشتیبان در GitHub ذخیره شد');return true;
+  }catch(e){if(!silent)ntf('پشتیبان GitHub: '+(e.message||'اتصال برقرار نشد'));return false;}finally{ghBusy=false;}}
+function ghSchedule(){if(!ghOn())return;clearTimeout(ghTimer);ghTimer=setTimeout(()=>ghBackup(true),15000);}
+function ghStatusText(){if(!ghOn())return 'غیرفعال — بدون VPN کار می‌کند';const c=ghCfg();const l=+localStorage.getItem(GH_LAST)||0;
+  return `فعال — ${c.owner}/${c.repo}${c.pass?'، رمزنگاری‌شده':''}؛ `+(l?'آخرین پشتیبان '+new Date(l).toLocaleString('fa-IR'):'هنوز پشتیبانی ثبت نشده');}
+function openGhSheet(){
+  let c=ghCfg();if(!c.token){try{const s=JSON.parse(localStorage.getItem('srm_gh_cfg')||'{}');if(s.token)c={owner:s.owner,repo:s.repo,token:s.token};}catch(e){}}
+  openSheet(`${sheetHead('پشتیبان GitHub','بدون VPN؛ هر پشتیبان یک نسخه در تاریخچه')}
+  <details><summary class="dim" style="cursor:pointer">راهنمای یک‌باره</summary><p class="dim" style="line-height:2">همان ریپوی خصوصی و توکنی که برای «سرمایه» ساخته‌اید کافی است (املاک در فایل جداگانهٔ <code>amlak-backup.json</code> ذخیره می‌شود). اگر هنوز نساخته‌اید: ریپوی Private ← Fine-grained token فقط برای همان ریپو با Contents: Read and write.</p></details>
+  ${field('نام کاربری GitHub',`<input id="gh-owner" dir="ltr" value="${esc(c.owner||'ahmadr59-ops')}">`)}
+  ${field('نام ریپو',`<input id="gh-repo" dir="ltr" value="${esc(c.repo||'sarmaye-backup')}">`)}
+  ${field('توکن دسترسی',`<input id="gh-token" type="password" dir="ltr" value="${esc(c.token||'')}">`,'فقط روی همین دستگاه ذخیره می‌شود')}
+  ${field('رمز رمزنگاری (اختیاری)',`<input id="gh-pass" type="password" dir="ltr" value="${esc(c.pass||'')}">`,'اگر فراموش شود، پشتیبان‌ها قابل بازیابی نیستند')}
+  <button class="btn pri" onclick="saveGh()">ذخیره و آزمایش اتصال</button>
+  <div class="acts"><button class="btn" onclick="ghBackup(false)">پشتیبان الان</button><button class="btn" onclick="ghHist()">نسخه‌ها و بازیابی</button></div>
+  <div id="gh-hist"></div>
+  ${ghOn()?`<button class="btn danger" onclick="ghOff()">غیرفعال کردن روی این دستگاه</button>`:''}
+  <button class="btn" onclick="openSettings()">بازگشت به تنظیمات</button>`);}
+async function saveGh(){const c={owner:val('gh-owner').trim(),repo:val('gh-repo').trim(),token:val('gh-token').trim(),pass:val('gh-pass')};
+  if(!c.owner||!c.repo||!c.token)return ntf('نام کاربری، ریپو و توکن را وارد کنید');
+  localStorage.setItem(GH_KEY,JSON.stringify(c));ntf('آزمایش اتصال…');if(await ghBackup(false))openGhSheet();}
+function ghOff(){if(!confirm('پشتیبان GitHub روی این دستگاه غیرفعال شود؟'))return;localStorage.removeItem(GH_KEY);localStorage.removeItem(GH_LAST);openSettings();}
+async function ghHist(){const b=$('gh-hist');b.innerHTML='<p class="dim">در حال دریافت…</p>';
+  try{const r=await ghFetch('/commits?path='+GH_FILE+'&per_page=15');if(!r.ok)throw new Error(ghErr(r));const H=await r.json();
+    b.innerHTML=H.length?`<div class="list">${H.map(h=>`<button class="row tap" onclick="ghRestore('${h.sha}')"><div class="rb"><b>${esc(new Date(h.commit.committer.date).toLocaleString('fa-IR'))}</b><small>${esc(h.commit.message)}</small></div></button>`).join('')}</div>`:'<p class="dim">هنوز نسخه‌ای وجود ندارد</p>';
+  }catch(e){b.innerHTML=`<p class="owe">${esc(e.message||'اتصال برقرار نشد')}</p>`;}}
+async function ghRestore(sha){
+  try{const r=await ghFetch('/contents/'+GH_FILE+'?ref='+sha,{accept:'application/vnd.github.raw+json'});if(!r.ok)throw new Error(ghErr(r));
+    let d=JSON.parse(await r.text());
+    if(d.amlakEnc===1){const pass=ghCfg().pass||prompt('رمز رمزنگاری پشتیبان:');if(!pass)return;try{d=await ghDec(d,pass);}catch(e){return ntf('رمز اشتباه است');}}
+    if(!Array.isArray(d.properties)||!Array.isArray(d.contracts))return ntf('این نسخه فایل معتبر املاک نیست');
+    if(!confirm('داده‌های فعلی این دستگاه با این نسخه جایگزین شود؟'))return;
+    await dbSet('state_before_gh_restore',JSON.parse(JSON.stringify(ST)));
+    ST=normalize(d);applyTheme();await sv(true);closeSheet();render();ntf('بازیابی از GitHub انجام شد');
+  }catch(e){ntf('بازیابی GitHub: '+(e.message||'اتصال برقرار نشد'));}}
 
 </script>
 </body>
