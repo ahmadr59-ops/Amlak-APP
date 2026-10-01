@@ -175,6 +175,13 @@ tr:last-child td{border-bottom:0}td small{display:block;font-size:12px;color:var
   font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 html[data-theme="dark"] #toast{background:#2A3A5C}
+/* v1.4 rent roll */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.kpis div{background:rgba(255,255,255,.08);border-radius:12px;padding:8px 10px}
+.kpis small{display:block;font-size:12px;opacity:.8}.kpis b{font-size:14px}
+.strip{display:flex;gap:4px;margin-top:8px;width:100%}.cell{flex:1;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--line,#e4e7ee)}
+.cell i{font-style:normal;font-size:12px;color:#fff;font-weight:700}.cell.paid{background:#1A8A4A}.cell.partial{background:#D98E04}.cell.late{background:#C8323C}.cell.upcoming{background:#9AA3B5}.cell.none{background:transparent;border:1px dashed #9AA3B5}.cell.none i{color:#9AA3B5}
+.cell.now{outline:2px solid var(--brass,#B08D3E);outline-offset:1px}
+.legend{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.legend .cell{flex:none;width:14px;height:14px;display:inline-block;margin-inline-start:6px}
 </style>
 </head>
 <body>
@@ -207,7 +214,7 @@ html[data-theme="dark"] #toast{background:#2A3A5C}
 //   • Guarantee cheques are never payments.
 //   • Partner settlement is on a CASH basis per Jalali year.
 // ============================================================
-const APP_VERSION='v1.3';
+const APP_VERSION='v1.4';
 const FA='۰۱۲۳۴۵۶۷۸۹';
 const MFA=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const MSH=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -380,18 +387,15 @@ function delProperty(pid){contractsOfProp(pid).forEach(c=>delContract(c.id));ST.
 // ---------------- Reminders ----------------
 function reminders(asOf){
   asOf=asOf||today();
-  const win=ST.settings.remindDays||0,lim=addDays(asOf,win),ai=tIdx(asOf),items=[];
+  // v1.4: remind only when rent is still unpaid `grace` days AFTER its due date (default 2)
+  const grace=Math.max(0,ST.settings.remindDays??2),ai=tIdx(asOf),items=[];
   activeContracts().forEach(c=>{
     const L=ledger(c,asOf);
-    const late=L.charges.filter(x=>x.due&&x.paid<x.amount);
+    const late=L.charges.filter(x=>x.due&&x.paid<x.amount&&dayNum(asOf)-dayNum(x)>=grace);
     if(late.length) items.push({key:`late_${c.id}_${ai}`,type:'late',cid:c.id,amount:L.balance,first:late[0],count:late.length,days:dayNum(asOf)-dayNum(late[0])});
-    else{
-      const up=L.charges.find(x=>!x.due&&x.paid<x.amount&&cmpD(x,lim)<=0);
-      if(up) items.push({key:`up_${c.id}_${up.idx}`,type:'upcoming',cid:c.id,amount:up.amount-up.paid,first:up,days:dayNum(up)-dayNum(asOf)});
-    }
     if(needsRenewal(c,asOf)) items.push({key:`renew_${c.id}_${lastIdx(c)}_${ai}`,type:'renew',cid:c.id,last:lastIdx(c)});
   });
-  ST.cheques.filter(q=>q.kind==='rent'&&q.status==='pending'&&cmpD(q.due,lim)<=0).forEach(q=>{
+  ST.cheques.filter(q=>q.kind==='rent'&&q.status==='pending'&&cmpD(q.due,asOf)<=0).forEach(q=>{   // cheques: on their date (time to deposit)
     const days=dayNum(q.due)-dayNum(asOf);
     items.push({key:`chq_${q.id}_${days<0?'late':'up'}`,type:'cheque',qid:q.id,cid:q.contractId,amount:q.amount,days});
   });
@@ -444,8 +448,8 @@ function depositsHeld(){return ST.contracts.filter(c=>c.deposit>0&&c.depReceived
 function icsEsc(s){return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');}
 function buildICS(asOf){
   asOf=asOf||today();
-  const n=Math.max(0,ST.settings.remindDays||0);
-  const pre=n>=1?`-P${n-1}DT15H`:'PT9H'; // 09:00, n days before (all-day event)
+  const n=Math.max(0,ST.settings.remindDays??2);
+  const pre='PT9H'; // v1.4: all-day event on due+n days, alarm at 09:00
   const ymd=d=>{const g=jToG(d.y,d.m,d.d);return g.getUTCFullYear()+String(g.getUTCMonth()+1).padStart(2,'0')+String(g.getUTCDate()).padStart(2,'0');};
   const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
   const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Amlak//FA','CALSCALE:GREGORIAN','X-WR-CALNAME:املاک'];
@@ -458,7 +462,7 @@ function buildICS(asOf){
     const p=propOf(c.propertyId),t=tenOf(c.tenantId);
     ledger(c,asOf).charges.forEach(x=>{
       if(x.paid>=x.amount||x.idx>horizon||x.idx<tIdx(asOf)) return;
-      ev(`r-${c.id}-${x.idx}`,x,`اجاره ${p?p.name:''} (${t?t.name:''})`,`مبلغ: ${nf(x.amount-x.paid)} تومان`);count++;
+      ev(`r-${c.id}-${x.idx}`,addDays(x,n),`پیگیری اجاره ${p?p.name:''} (${t?t.name:''})`,`اگر هنوز پرداخت نشده: ${nf(x.amount-x.paid)} تومان — سررسید ${fmtD(x)}`);count++;
     });
   });
   ST.cheques.filter(q=>q.kind==='rent'&&q.status==='pending'&&cmpD(q.due,asOf)>=0).forEach(q=>{
@@ -595,7 +599,8 @@ function vToday(){
   activeContracts().forEach(c=>{const x=ledger(c).charges.find(h=>h.idx===ci);if(x){mExp+=x.amount;mGot+=x.paid;}});
   const pct=mExp?Math.min(100,Math.round(mGot/mExp*100)):0;
   const items=reminders(t);
-  const soon=ST.cheques.filter(q=>(q.status==='pending')&&dayNum(q.due)-dayNum(t)>(ST.settings.remindDays||0)&&dayNum(q.due)-dayNum(t)<=30).sort((a,b)=>cmpD(a.due,b.due));
+  let old30=0;activeContracts().forEach(c=>{const g=aging(c,t);old30+=g.b+g.c;});
+  const soon=ST.cheques.filter(q=>(q.status==='pending')&&dayNum(q.due)-dayNum(t)>0&&dayNum(q.due)-dayNum(t)<=30).sort((a,b)=>cmpD(a.due,b.due));
   const lb=Math.max(ST.settings.lastBackup||0,ST.settings.lastCloud||0,+(localStorage.getItem('amlak_gh_last')||0));const stale=!lb||(Date.now()-lb)>14*864e5;
   return `
   <section class="hero">
@@ -603,11 +608,13 @@ function vToday(){
     <p class="hero-n ${arrears>0?'is-late':''}">${nf(arrears)}<small>تومان</small></p>
     <div class="meter"><span style="width:${pct}%"></span></div>
     <p class="hero-s">اجارهٔ ${MFA[t.m]}: <b>${nf(mGot)}</b> از ${nf(mExp)} وصول شده (${toFa(pct)}٪)</p>
+    <div class="kpis"><div><small>وصول‌شدهٔ این ماه</small><b>${nf(mGot)}</b></div><div><small>باقی‌ماندهٔ این ماه</small><b>${nf(Math.max(0,mExp-mGot))}</b></div><div><small>معوق بیش از ۳۰ روز</small><b class="${old30>0?'is-late':''}">${nf(old30)}</b></div></div>
   </section>
-  ${(ST.bridge||[]).length?`<h3 class="sec">واریزهای ارسالی از «سرمایه»</h3><div class="list">${ST.bridge.map(b=>`<div class="row"><span class="ri r-ok">${svg('upcoming')}</span><div class="rb"><b>${nf(b.a)} تومان</b><small>${esc(b.bank||'')}${b.acc?'، '+esc(b.acc):''}، ${fmtD(b.date)}</small></div>
+  ${(ST.bridge||[]).length?`<h3 class="sec">واریزهای ارسالی از «سرمایه»</h3><div class="list">${ST.bridge.map(b=>`<div class="row"><span class="ri r-ok">${svg('upcoming')}</span><div class="rb"><b>${b.kind==='deposit'?(b.dir==='out'?'بازگشت پول پیش ':'پول پیش '):''}${nf(b.a)} تومان</b><small>${esc(b.bank||'')}${b.acc?'، '+esc(b.acc):''}، ${fmtD(b.date)}</small></div>
     <div class="ra"><button class="mini ok" onclick="openBridge('${b.id}')">ثبت برای مستأجر</button><button class="dis" onclick="bridgeResolve('${b.id}',null)" aria-label="نادیده">✕</button></div></div>`).join('')}</div>`:''}
   <h3 class="sec">نیاز به اقدام</h3>
   ${items.length?`<div class="list">${items.map(itemRow).join('')}</div>`:`<p class="calm">موردی برای امروز نیست.</p>`}
+  ${rentRoll(t)}
   ${soon.length?`<h3 class="sec">چک‌های ۳۰ روز آینده</h3><div class="list">${soon.map(q=>{const c=ctrOf(q.contractId);return `<div class="row"><span class="ri r-chq">${svg('cheque')}</span><div class="rb"><b>${nf(q.amount)} تومان</b><small>${esc(tenName(c))}، سررسید ${fmtD(q.due)}</small></div></div>`;}).join('')}</div>`:''}
   ${stale?`<button class="nudge" onclick="doBackup()">آخرین پشتیبان ${lb?'بیش از دو هفته پیش':'هنوز گرفته نشده'} — الان پشتیبان بگیرید</button>`:''}`;
 }
@@ -971,7 +978,7 @@ function openSettings(){
   const s=ST.settings;
   openSheet(`${sheetHead('تنظیمات','نسخهٔ '+toFa(APP_VERSION))}
   <div class="g2">${field('حالت نمایش',`<select id="st_th"><option value="auto"${s.theme==='auto'?' selected':''}>خودکار</option><option value="light"${s.theme==='light'?' selected':''}>روشن</option><option value="dark"${s.theme==='dark'?' selected':''}>تیره</option></select>`)}
-  ${field('یادآوری چند روز قبل',`<input id="st_rd" inputmode="numeric" value="${toFa(s.remindDays)}">`)}</div>
+  ${field('یادآوری چند روز بعد از سررسید',`<input id="st_rd" inputmode="numeric" value="${toFa(s.remindDays??2)}">`,'اگر تا این مدت پرداخت نشده باشد')}</div>
   ${field('متن پیامک یادآوری',`<textarea id="st_sms" rows="4">${esc(s.smsTpl)}</textarea>`,'جایگزین‌ها: {نام} {ملک} {مبلغ} {ماه} {سررسید} {وضعیت}')}
   <button class="btn pri" onclick="saveSettings()">ذخیرهٔ تنظیمات</button>
   <div class="divider"></div><h3 class="sec m0">پشتیبان GitHub (بدون VPN)</h3><p class="dim" id="gh-status">${ghStatusText()}</p><button class="btn" onclick="openGhSheet()">تنظیم پشتیبان GitHub</button>
@@ -1050,10 +1057,26 @@ function openBridge(id){
   const b=(ST.bridge||[]).find(x=>x.id===id);if(!b)return;
   const C=bridgeCandidates(b.a);
   if(!C.length)return ntf('قرارداد فعالی وجود ندارد');
-  openSheet(`${sheetHead('ثبت واریز '+nf(b.a)+' تومان',esc(b.bank||'')+'، '+fmtD(b.date))}
-  <p class="dim">این مبلغ پرداخت کدام مستأجر است؟ موارد هم‌مبلغ در بالای فهرست آمده‌اند.</p>
+  const dep=b.kind==='deposit';
+  openSheet(`${sheetHead((dep?(b.dir==='out'?'بازگرداندن پول پیش ':'دریافت پول پیش '):'ثبت واریز ')+nf(b.a)+' تومان',esc(b.bank||'')+'، '+fmtD(b.date))}
+  <p class="dim">${dep?'این پول پیش مربوط به کدام قرارداد است؟':'این مبلغ پرداخت کدام مستأجر است؟ موارد هم‌مبلغ در بالای فهرست آمده‌اند.'}</p>
   <div class="list">${C.map(x=>`<button class="row tap" onclick="bridgeResolve('${b.id}','${x.c.id}')"><div class="rb"><b>${esc(tenName(x.c))}${x.score>=2?' <span class="chip ok">هم‌مبلغ</span>':''}</b><small>${esc(propName(x.c))}، ${x.balance>0?'معوق '+nf(x.balance):'بدون معوق'}، اجاره ${nf(currentRent(x.c))}</small></div></button>`).join('')}</div>
   <button class="btn" onclick="bridgeResolve('${b.id}',null)">مربوط به اجاره نیست (نادیده)</button>`);
+}
+
+// ---------------- v1.4: rent roll (status per tenant, last payment, next due, 8-month strip) ----------------
+function rentRoll(t){
+  const L=activeContracts();if(!L.length)return'';const ci=tIdx(t);
+  return `<h3 class="sec">وضعیت اجاره‌ها</h3><div class="list">${L.map(c=>{
+    const led=ledger(c,t);const bal=led.balance;const pays=paymentsOf(c.id);const lastP=pays[pays.length-1];
+    const nx=led.charges.find(x=>x.paid<x.amount&&!x.due)||led.charges.find(x=>x.idx>ci);
+    const cells=[];for(let k=ci-6;k<=ci+1;k++)cells.push(led.charges.find(x=>x.idx===k)||{idx:k,m:((k%12)+12)%12,status:'none',paid:0,amount:0}); // fixed 8 slots
+    const chip=bal>0?`<span class="chip bad">بدهکار ${nf(bal)}</span>`:bal<0?`<span class="chip ok">پیش‌پرداخت ${nf(-bal)}</span>`:`<span class="chip ok">تسویه ✓</span>`;
+    return `<button class="row tap col" onclick="openStatement('${c.id}')"><div class="rtop" style="width:100%"><div class="rb"><b>${esc(tenName(c))} ${chip}</b>
+      <small>${esc(propName(c))} · اجاره ${nf(currentRent(c))}</small>
+      <small>آخرین پرداخت: ${lastP?fmtD(lastP.date)+' ('+nf(lastP.amount)+')':'—'}${nx?` · سررسید بعدی: ${fmtD(nx)}`:''}</small></div></div>
+      <div class="strip">${cells.map(x=>`<span class="cell ${x.status}${x.idx===ci?' now':''}" title="${MFA[x.m]}${x.status==='none'?' — خارج از قرارداد':': '+nf(x.paid)+' از '+nf(x.amount)}"><i>${MFA[x.m].slice(0,3)}</i></span>`).join('')}</div></button>`;}).join('')}</div>
+    <p class="dim legend"><span class="cell paid"></span>پرداخت‌شده <span class="cell partial"></span>ناقص <span class="cell late"></span>پرداخت‌نشده <span class="cell upcoming"></span>آینده</p>`;
 }
 
 // ============================================================
@@ -1178,7 +1201,9 @@ async function fetchBridge(){
 async function bridgeResolve(id,contractId){
   const b=(ST.bridge||[]).find(x=>x.id===id);if(!b)return;
   try{
-    if(contractId) addPayment({contractId,amount:b.a,date:b.date,method:'transfer',note:'پیامک '+(b.bank||'بانک')});
+    if(contractId&&b.kind==='deposit'){const c=ctrOf(contractId);
+      if(b.dir==='out')c.depReturned=b.date;else{c.depReceived=b.date;if(!c.deposit)c.deposit=b.a;}}
+    else if(contractId) addPayment({contractId,amount:b.a,date:b.date,method:'transfer',note:'پیامک '+(b.bank||'بانک')});
     ST.bridgeDone[id]=Date.now();ST.bridge=ST.bridge.filter(x=>x.id!==id);
     await sv();closeSheet();render();ntf(contractId?'پرداخت ثبت شد':'نادیده گرفته شد');
     if(typeof ghOn==='function'&&ghOn()) ghInboxRemove(id).catch(()=>{});
