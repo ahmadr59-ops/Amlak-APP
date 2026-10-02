@@ -224,7 +224,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{fo
 //   • Guarantee cheques are never payments.
 //   • Partner settlement is on a CASH basis per Jalali year.
 // ============================================================
-const APP_VERSION='v1.8';
+const APP_VERSION='v1.9';
 const FA='۰۱۲۳۴۵۶۷۸۹';
 const MFA=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const MSH=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -1299,6 +1299,8 @@ async function ghInboxRemove(id){
     if(p.ok)return true;if(p.status!==409&&p.status!==422)return false;}
   return false;
 }
+function copyTok(id){const v=val(id);if(!v)return ntf('توکنی وارد نشده');
+  (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>ntf('توکن کپی شد؛ در اپ دیگر بچسبانید')).catch(()=>{const el=$(id);el.type='text';el.select();ntf('توکن را انتخاب و کپی کنید');});}
 function ghSchedule(){if(!ghOn())return;clearTimeout(ghTimer);ghTimer=setTimeout(()=>ghBackup(true),15000);}
 function ghStatusText(){if(!ghOn())return 'غیرفعال — بدون VPN کار می‌کند';const c=ghCfg();const l=+localStorage.getItem(GH_LAST)||0;
   return `فعال — ${c.owner}/${c.repo}${c.pass?'، رمزنگاری‌شده':''}؛ `+(l?'آخرین پشتیبان '+new Date(l).toLocaleString('fa-IR'):'هنوز پشتیبانی ثبت نشده');}
@@ -1309,6 +1311,7 @@ function openGhSheet(){
   ${field('نام کاربری GitHub',`<input id="gh-owner" dir="ltr" value="${esc(c.owner||'ahmadr59-ops')}">`)}
   ${field('نام ریپو',`<input id="gh-repo" dir="ltr" value="${esc(c.repo||'sarmaye-backup')}">`)}
   ${field('توکن دسترسی',`<input id="gh-token" type="password" dir="ltr" value="${esc(c.token||'')}">`,'فقط روی همین دستگاه ذخیره می‌شود')}
+  <button class="btn" onclick="copyTok('gh-token')">📋 کپی توکن (برای «سرمایه» و «صرافی»)</button>
   ${field('رمز رمزنگاری (اختیاری)',`<input id="gh-pass" type="password" dir="ltr" value="${esc(c.pass||'')}">`,'اگر فراموش شود، پشتیبان‌ها قابل بازیابی نیستند')}
   <button class="btn pri" onclick="saveGh()">ذخیره و آزمایش اتصال</button>
   <div class="acts"><button class="btn" onclick="ghBackup(false)">پشتیبان الان</button><button class="btn" onclick="ghHist()">نسخه‌ها و بازیابی</button></div>
