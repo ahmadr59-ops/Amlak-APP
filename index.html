@@ -217,7 +217,7 @@ html[data-theme="dark"] #toast{background:#2A3A5C}
 //   • Guarantee cheques are never payments.
 //   • Partner settlement is on a CASH basis per Jalali year.
 // ============================================================
-const APP_VERSION='v1.5';
+const APP_VERSION='v1.6';
 const FA='۰۱۲۳۴۵۶۷۸۹';
 const MFA=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const MSH=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -322,20 +322,30 @@ function currentRent(c){
 function covM(idx){return ((idx-1)%12+12)%12;}
 function needsRenewal(c,asOf){return c.status==='active'&&tIdx(asOf)>=lastIdx(c);}
 
-// FIFO ledger. `cover[paymentId]` = charge idx list the payment settled.
+// v1.6 ledger: every payment belongs to ITS OWN month.
+//  1) target = the month you chose (p.target), else the month whose due date is nearest to the
+//     payment date (±20 days) that still has something unpaid;
+//  2) anything left over goes to the oldest unpaid month first, then to future months (prepayment);
+//  3) beyond the schedule → credit.  An unpaid month therefore stays red on its own.
+//  Totals (due, paid, balance) are identical to the old FIFO ledger; only the per-month split differs.
+//  Computed (not stored), so it can never drift when a contract or payment is edited.
+function payTarget(ch,p){
+  if(p.target!=null){const t=ch.find(x=>x.idx===p.target);if(t)return t;}
+  const dp=dayNum(p.date);let best=null,bd=21;
+  ch.forEach(x=>{const d=Math.abs(dayNum(x)-dp);if(d<bd&&x.paid<x.amount){best=x;bd=d;}});
+  return best;
+}
 function ledger(c,asOf){
   asOf=asOf||today();
   const ch=charges(c).map(x=>({...x,paid:0,due:cmpD(x,asOf)<=0}));
   const pays=paymentsOf(c.id);
-  const cover={};let ci=0,credit=0,totalPaid=0;
+  const cover={};let credit=0,totalPaid=0;
   pays.forEach(p=>{
-    let rem=p.amount;totalPaid+=p.amount;cover[p.id]=[];
-    while(rem>0&&ci<ch.length){
-      const x=ch[ci];const a=Math.min(x.amount-x.paid,rem);
-      if(a>0){x.paid+=a;rem-=a;cover[p.id].push(x.idx);}
-      if(x.paid>=x.amount)ci++;
-    }
-    credit+=rem;
+    let left=p.amount;totalPaid+=p.amount;cover[p.id]=[];
+    const put=x=>{const a=Math.min(x.amount-x.paid,left);if(a>0){x.paid+=a;left-=a;cover[p.id].push(x.idx);}};
+    const t=payTarget(ch,p);if(t)put(t);
+    for(const x of ch){if(left<=0)break;put(x);}
+    credit+=left;
   });
   // v1.5: a month that is not due yet is never a warning — partial money there is a prepayment
   ch.forEach(x=>{x.status=x.paid>=x.amount?'paid':!x.due?(x.paid>0?'prepaid':'upcoming'):(x.paid>0?'partial':'late');});
@@ -353,11 +363,12 @@ function aging(c,asOf){
 }
 
 // ---------------- Mutations (return value or throw Error with Persian msg) ----------------
-function addPayment({contractId,amount,date,method,note,chequeId}){
+function addPayment({contractId,amount,date,method,note,chequeId,target}){
   if(!ctrOf(contractId)) throw new Error('قرارداد یافت نشد');
   if(!(amount>0)) throw new Error('مبلغ باید بزرگتر از صفر باشد');
   if(!date) throw new Error('تاریخ نامعتبر است');
   const p={id:uid(),contractId,date,amount,method:method||'transfer',chequeId:chequeId||null,note:note||'',legacyPeriod:null};
+  if(target!=null&&target!=='')p.target=+target;
   ST.payments.push(p);return p;
 }
 function delPayment(id){
@@ -649,11 +660,11 @@ function vProps(){
       <header><span class="pt">${svg(p.type==='com'?'shop':'home')}</span><div class="pn"><h4>${esc(p.name)}</h4><p>${c?esc(tenName(c)):'<span class="dim">بدون مستأجر</span>'}</p></div>
       <div class="pr">${c?`<b>${nf(currentRent(c))}</b><small>تومان در ماه</small>`:''}</div></header>
       ${share?`<div class="chips">${share}</div>`:''}
-      ${c?strip(c,y):''}
+      ${c?monthStrip(c,today()):''}
       ${L&&L.balance>0?`<p class="owe">معوق: ${nf(L.balance)} تومان</p>`:L&&L.balance<0?`<p class="adv">پیش‌پرداخت: ${nf(-L.balance)} تومان</p>`:''}
     </article>`;}).join('');
   return `<div class="bar"><h3 class="sec m0">املاک (${toFa(ST.properties.length)})</h3><button class="btn pri sm" onclick="openProp()">ملک جدید</button></div>
-  ${ST.properties.length?`<div class="legend"><i class="c-paid"></i>پرداخت‌شده<i class="c-partial"></i>ناقص<i class="c-late"></i>معوق<i class="c-upcoming"></i>آینده</div>${cards}`:`<p class="calm">هنوز ملکی ثبت نشده است.</p>`}`;
+  ${ST.properties.length?`${cards}${rollLegend()}`:`<p class="calm">هنوز ملکی ثبت نشده است.</p>`}`;
 }
 
 // ---------------- Tab: Tenants ----------------
@@ -865,7 +876,7 @@ function openStatement(cid,y){
   </tbody></table></div>
   <h3 class="sec">پرداخت‌ها</h3>
   ${pays.length?`<div class="list">${pays.map(p=>`<div class="row"><div class="rb"><b>${nf(p.amount)} تومان</b><small>${fmtD(p.date)}، ${METHOD[p.method||'']}${(L.cover[p.id]||[]).length?`، بابت اجارهٔ ${[...new Set(L.cover[p.id])].map(i=>MFA[covM(i)]).join('، ')}`:''}${p.note?`، ${esc(p.note)}`:''}</small></div>
-    <div class="ra"><button class="mini" onclick="shareReceipt('${p.id}')">رسید</button><button class="mini bad" onclick="askDelPay('${p.id}','${cid}')">حذف</button></div></div>`).join('')}</div>`:'<p class="calm">پرداختی ثبت نشده است.</p>'}`);
+    <div class="ra"><button class="mini" onclick="openRetarget('${p.id}','${cid}')">ماه</button><button class="mini" onclick="shareReceipt('${p.id}')">رسید</button><button class="mini bad" onclick="askDelPay('${p.id}','${cid}')">حذف</button></div></div>`).join('')}</div>`:'<p class="calm">پرداختی ثبت نشده است.</p>'}`);
 }
 function openPay(cid){
   const c=ctrOf(cid);const L=ledger(c);
@@ -874,6 +885,7 @@ function openPay(cid){
   openSheet(`${sheetHead('ثبت پرداخت',esc(tenName(c))+'، '+esc(propName(c)))}
   ${field('مبلغ (تومان)',money('y_amt',suggest),L.balance>0?`معوق فعلی ${nf(L.balance)} تومان`:next?`اجارهٔ بعدی: ${MFA[next.m]}`:'')}
   ${field('تاریخ دریافت',dateIn('y_date',today()))}
+  ${field('بابت اجارهٔ کدام ماه؟',`<select id="y_t"><option value="">خودکار — ${(()=>{const s=payTarget(L.charges,{date:today()})||L.charges.find(x=>x.paid<x.amount);return s?'اجارهٔ '+MFA[covM(s.idx)]:'نزدیک‌ترین سررسید';})()}</option>${L.charges.filter(x=>x.paid<x.amount).slice(0,8).map(x=>`<option value="${x.idx}">اجارهٔ ${MFA[covM(x.idx)]} ${toFa(Math.floor((x.idx-1)/12))} — مانده ${nf(x.amount-x.paid)}</option>`).join('')}</select>`,'مبلغ اضافه، اول به قدیمی‌ترین ماهِ پرداخت‌نشده می‌رود')}
   ${field('روش',`<select id="y_m"><option value="transfer">کارت/واریز</option><option value="cash">نقد</option></select>`,'برای چک، از صفحهٔ چک‌ها ثبت کنید؛ با وصول، خودکار پرداخت می‌شود')}
   ${field('یادداشت','<input id="y_note">')}
   <button class="btn pri" onclick="savePay('${cid}')">ثبت پرداخت</button>`);
@@ -881,7 +893,7 @@ function openPay(cid){
 async function savePay(cid){
   const amount=toLn(val('y_amt'));if(!(amount>0))return errIn('y_amt','مبلغ را وارد کنید');
   const date=readDate('y_date');if(!date)return errIn('y_date','تاریخ نامعتبر است');
-  try{addPayment({contractId:cid,amount,date,method:val('y_m'),note:val('y_note').trim()});await sv();ntf('پرداخت ثبت شد؛ رسید را از فهرست پرداخت‌ها بفرستید');render();openStatement(cid,date.y);}
+  try{addPayment({contractId:cid,amount,date,method:val('y_m'),note:val('y_note').trim(),target:val('y_t')});await sv();ntf('پرداخت ثبت شد؛ رسید را از فهرست پرداخت‌ها بفرستید');render();openStatement(cid,date.y);}
   catch(e){ntf(e.message);}
 }
 function askDelPay(pid,cid){
@@ -1076,15 +1088,32 @@ function rentRoll(t){
   return `<h3 class="sec">وضعیت اجاره‌ها</h3><div class="list">${L.map(c=>{
     const led=ledger(c,t);const bal=led.balance;const pays=paymentsOf(c.id);const lastP=pays[pays.length-1];
     const nx=led.charges.find(x=>x.paid<x.amount&&!x.due)||led.charges.find(x=>x.idx>ci);
-    const cells=[];for(let k=ci-4;k<=ci+1;k++)cells.push(led.charges.find(x=>x.idx===k)||{idx:k,m:((k%12)+12)%12,status:'none',paid:0,amount:0}); // v1.5: 6 readable slots
     const chip=bal>0?`<span class="chip bad">بدهکار ${nf(bal)}</span>`:bal<0?`<span class="chip ok">پیش‌پرداخت ${nf(-bal)}</span>`:`<span class="chip ok">تسویه ✓</span>`;
     return `<button class="row tap col" onclick="openStatement('${c.id}')"><div class="rtop" style="width:100%"><div class="rb"><b>${esc(tenName(c))} ${chip}</b>
       <small>${esc(propName(c))} · اجاره ${nf(currentRent(c))}</small>
       <small>آخرین پرداخت: ${lastP?fmtD(lastP.date)+' ('+nf(lastP.amount)+')':'—'}${nx?` · سررسید بعدی: ${fmtD(nx)}`:''}</small></div></div>
-      <div class="strip">${cells.map(x=>`<div class="mcell"><span class="cell ${x.status}${x.idx===ci?' now':''}">${x.status==='prepaid'?'<i>+</i>':''}</span><em>${MFA[covM(x.idx)]}</em></div>`).join('')}</div></button>`;}).join('')}</div>
-    <p class="dim legend"><span class="cell paid"></span>پرداخت‌شده <span class="cell partial"></span>ناقص <span class="cell late"></span>پرداخت‌نشده <span class="cell upcoming"></span>آینده <span class="cell prepaid"><i>+</i></span>پیش‌پرداخت</p>
+      ${monthStrip(c,t,led)}</button>`;}).join('')}</div>${rollLegend()}`;
+}
+
+// ---------------- v1.6: one readable month strip for «امروز» and «املاک» ----------------
+function monthStrip(c,t,led){
+  led=led||ledger(c,t);const ci=tIdx(t);const cells=[];
+  for(let k=ci-4;k<=ci+1;k++)cells.push(led.charges.find(x=>x.idx===k)||{idx:k,m:((k%12)+12)%12,status:'none',paid:0,amount:0});
+  return `<div class="strip">${cells.map(x=>`<div class="mcell"><span class="cell ${x.status}${x.idx===ci?' now':''}">${x.status==='prepaid'?'<i>+</i>':''}</span><em>${MFA[covM(x.idx)]}</em></div>`).join('')}</div>`;
+}
+function rollLegend(){
+  return `<p class="dim legend"><span class="cell paid"></span>پرداخت‌شده <span class="cell partial"></span>ناقص <span class="cell late"></span>پرداخت‌نشده <span class="cell upcoming"></span>آینده <span class="cell prepaid"><i>+</i></span>پیش‌پرداخت</p>
     <p class="dim">نام هر خانه = ماهِ اجاره؛ سررسیدِ آن ماهِ بعد است. خانهٔ قاب‌دار، اجاره‌ای است که این ماه سررسید می‌شود.</p>`;
 }
+// ---------------- v1.6: choose which month a payment belongs to ----------------
+function openRetarget(pid,cid){
+  const p=byId(ST.payments,pid);const c=ctrOf(cid);if(!p||!c)return;const L=ledger(c);
+  openSheet(`${sheetHead('این پرداخت بابت کدام ماه است؟',nf(p.amount)+' تومان، '+fmtD(p.date))}
+  <div class="list"><button class="row tap" onclick="setTarget('${pid}','${cid}',null)"><div class="rb"><b>خودکار${p.target==null?' ✓':''}</b><small>نزدیک‌ترین سررسید به تاریخ پرداخت</small></div></button>
+  ${L.charges.map(x=>`<button class="row tap" onclick="setTarget('${pid}','${cid}',${x.idx})"><div class="rb"><b>اجارهٔ ${MFA[covM(x.idx)]} ${toFa(Math.floor((x.idx-1)/12))}${p.target===x.idx?' ✓':''}</b><small>${nf(x.amount)} — پرداخت‌شده ${nf(x.paid)}</small></div></button>`).join('')}</div>
+  <button class="btn" onclick="openStatement('${cid}')">بازگشت</button>`);
+}
+async function setTarget(pid,cid,idx){const p=byId(ST.payments,pid);if(!p)return;if(idx==null)delete p.target;else p.target=idx;await sv();render();openStatement(cid);ntf('ماهِ پرداخت به‌روز شد');}
 
 // ============================================================
 // CLOUD BACKUP (Firebase) — same project & same account as «سرمایه».
