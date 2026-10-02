@@ -181,6 +181,9 @@ html[data-theme="dark"] #toast{background:#2A3A5C}
 .strip{display:flex;gap:4px;margin-top:8px;width:100%}.cell{flex:1;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:var(--line,#e4e7ee)}
 .cell i{font-style:normal;font-size:12px;color:#fff;font-weight:700}.cell.paid{background:#1A8A4A}.cell.partial{background:#D98E04}.cell.late{background:#C8323C}.cell.upcoming{background:#9AA3B5}.cell.none{background:transparent;border:1px dashed #9AA3B5}.cell.none i{color:#9AA3B5}
 .cell.now{outline:2px solid var(--brass,#B08D3E);outline-offset:1px}
+.cell.prepaid{background:#9AA3B5}.st-prepaid{background:#E8EBF2;color:#5B6478}
+.mcell{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px}.mcell .cell{width:100%;height:22px;flex:none}
+.mcell em{font-style:normal;font-size:12px;font-weight:600;color:var(--ink2,#5B6478);white-space:nowrap;letter-spacing:-.3px}
 .legend{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.legend .cell{flex:none;width:14px;height:14px;display:inline-block;margin-inline-start:6px}
 </style>
 </head>
@@ -214,7 +217,7 @@ html[data-theme="dark"] #toast{background:#2A3A5C}
 //   • Guarantee cheques are never payments.
 //   • Partner settlement is on a CASH basis per Jalali year.
 // ============================================================
-const APP_VERSION='v1.4';
+const APP_VERSION='v1.5';
 const FA='۰۱۲۳۴۵۶۷۸۹';
 const MFA=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const MSH=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -315,6 +318,8 @@ function currentRent(c){
   const ch=charges(c);if(!ch.length)return 0;
   const cur=ch.find(x=>x.idx===tIdx());return cur?cur.amount:ch[ch.length-1].amount;
 }
+// Rent is paid in arrears: the charge due in month idx is the rent OF month idx-1
+function covM(idx){return ((idx-1)%12+12)%12;}
 function needsRenewal(c,asOf){return c.status==='active'&&tIdx(asOf)>=lastIdx(c);}
 
 // FIFO ledger. `cover[paymentId]` = charge idx list the payment settled.
@@ -332,7 +337,8 @@ function ledger(c,asOf){
     }
     credit+=rem;
   });
-  ch.forEach(x=>{x.status=x.paid>=x.amount?'paid':x.paid>0?'partial':(x.due?'late':'upcoming');});
+  // v1.5: a month that is not due yet is never a warning — partial money there is a prepayment
+  ch.forEach(x=>{x.status=x.paid>=x.amount?'paid':!x.due?(x.paid>0?'prepaid':'upcoming'):(x.paid>0?'partial':'late');});
   const dueTotal=ch.filter(x=>x.due).reduce((s,x)=>s+x.amount,0);
   return{charges:ch,totalPaid,dueTotal,balance:dueTotal-totalPaid,credit,cover};
 }
@@ -847,18 +853,18 @@ function openStatement(cid,y){
   const years=[...new Set(L.charges.map(x=>x.y))];y=y||(years.includes(today().y)?today().y:years[years.length-1]);
   const rows=L.charges.filter(x=>x.y===y);
   const pays=paymentsOf(cid).slice().reverse();
-  const stL={paid:'پرداخت‌شده',partial:'ناقص',late:'معوق',upcoming:'آینده'};
+  const stL={paid:'پرداخت‌شده',partial:'ناقص',late:'معوق',upcoming:'آینده',prepaid:'پیش‌پرداخت جزئی'};
   openSheet(`${sheetHead(esc(t?t.name:''),esc(propName(c)))}
   <div class="stbal ${L.balance>0?'is-late':L.balance<0?'is-adv':''}"><small>${L.balance>0?'بدهکار':L.balance<0?'بستانکار (پیش‌پرداخت)':'حساب تسویه است'}</small><b>${nf(Math.abs(L.balance))}</b></div>
   <div class="acts">${c.status==='active'?`<button class="btn pri" onclick="openPay('${cid}')">ثبت پرداخت</button><button class="btn" onclick="sendSms('${cid}')">پیامک</button>`:''}
     <button class="btn" onclick="shareStatement('${cid}',${y})">تصویر صورت‌حساب</button>${t&&t.phone?`<a class="btn" href="tel:${esc(t.phone)}">تماس</a>`:''}
     <button class="btn" onclick="openTenant('${c.tenantId}','${cid}')">مشخصات</button></div>
   ${years.length>1?`<div class="seg yrs">${years.map(v=>`<button class="${v===y?'on':''}" onclick="openStatement('${cid}',${v})">${toFa(v)}</button>`).join('')}</div>`:''}
-  <div class="tbl"><table><thead><tr><th>ماه</th><th>اجاره</th><th>پرداخت‌شده</th><th>وضعیت</th></tr></thead><tbody>
-  ${rows.map(x=>`<tr><td>${MFA[x.m]}<small>سررسید ${toFa(x.d)}ام</small></td><td>${nf(x.amount)}</td><td>${nf(x.paid)}</td><td><span class="chip st-${x.status}">${stL[x.status]}</span></td></tr>`).join('')||'<tr><td colspan="4">—</td></tr>'}
+  <div class="tbl"><table><thead><tr><th>اجارهٔ ماه</th><th>مبلغ</th><th>پرداخت‌شده</th><th>وضعیت</th></tr></thead><tbody>
+  ${rows.map(x=>`<tr><td>${MFA[covM(x.idx)]}<small>سررسید ${toFa(x.d)} ${MFA[x.m]}</small></td><td>${nf(x.amount)}</td><td>${nf(x.paid)}</td><td><span class="chip st-${x.status}">${stL[x.status]}</span></td></tr>`).join('')||'<tr><td colspan="4">—</td></tr>'}
   </tbody></table></div>
   <h3 class="sec">پرداخت‌ها</h3>
-  ${pays.length?`<div class="list">${pays.map(p=>`<div class="row"><div class="rb"><b>${nf(p.amount)} تومان</b><small>${fmtD(p.date)}، ${METHOD[p.method||'']}${(L.cover[p.id]||[]).length?`، بابت ${[...new Set(L.cover[p.id])].map(i=>MFA[i%12]).join('، ')}`:''}${p.note?`، ${esc(p.note)}`:''}</small></div>
+  ${pays.length?`<div class="list">${pays.map(p=>`<div class="row"><div class="rb"><b>${nf(p.amount)} تومان</b><small>${fmtD(p.date)}، ${METHOD[p.method||'']}${(L.cover[p.id]||[]).length?`، بابت اجارهٔ ${[...new Set(L.cover[p.id])].map(i=>MFA[covM(i)]).join('، ')}`:''}${p.note?`، ${esc(p.note)}`:''}</small></div>
     <div class="ra"><button class="mini" onclick="shareReceipt('${p.id}')">رسید</button><button class="mini bad" onclick="askDelPay('${p.id}','${cid}')">حذف</button></div></div>`).join('')}</div>`:'<p class="calm">پرداختی ثبت نشده است.</p>'}`);
 }
 function openPay(cid){
@@ -1070,13 +1076,14 @@ function rentRoll(t){
   return `<h3 class="sec">وضعیت اجاره‌ها</h3><div class="list">${L.map(c=>{
     const led=ledger(c,t);const bal=led.balance;const pays=paymentsOf(c.id);const lastP=pays[pays.length-1];
     const nx=led.charges.find(x=>x.paid<x.amount&&!x.due)||led.charges.find(x=>x.idx>ci);
-    const cells=[];for(let k=ci-6;k<=ci+1;k++)cells.push(led.charges.find(x=>x.idx===k)||{idx:k,m:((k%12)+12)%12,status:'none',paid:0,amount:0}); // fixed 8 slots
+    const cells=[];for(let k=ci-4;k<=ci+1;k++)cells.push(led.charges.find(x=>x.idx===k)||{idx:k,m:((k%12)+12)%12,status:'none',paid:0,amount:0}); // v1.5: 6 readable slots
     const chip=bal>0?`<span class="chip bad">بدهکار ${nf(bal)}</span>`:bal<0?`<span class="chip ok">پیش‌پرداخت ${nf(-bal)}</span>`:`<span class="chip ok">تسویه ✓</span>`;
     return `<button class="row tap col" onclick="openStatement('${c.id}')"><div class="rtop" style="width:100%"><div class="rb"><b>${esc(tenName(c))} ${chip}</b>
       <small>${esc(propName(c))} · اجاره ${nf(currentRent(c))}</small>
       <small>آخرین پرداخت: ${lastP?fmtD(lastP.date)+' ('+nf(lastP.amount)+')':'—'}${nx?` · سررسید بعدی: ${fmtD(nx)}`:''}</small></div></div>
-      <div class="strip">${cells.map(x=>`<span class="cell ${x.status}${x.idx===ci?' now':''}" title="${MFA[x.m]}${x.status==='none'?' — خارج از قرارداد':': '+nf(x.paid)+' از '+nf(x.amount)}"><i>${MFA[x.m].slice(0,3)}</i></span>`).join('')}</div></button>`;}).join('')}</div>
-    <p class="dim legend"><span class="cell paid"></span>پرداخت‌شده <span class="cell partial"></span>ناقص <span class="cell late"></span>پرداخت‌نشده <span class="cell upcoming"></span>آینده</p>`;
+      <div class="strip">${cells.map(x=>`<div class="mcell"><span class="cell ${x.status}${x.idx===ci?' now':''}">${x.status==='prepaid'?'<i>+</i>':''}</span><em>${MFA[covM(x.idx)]}</em></div>`).join('')}</div></button>`;}).join('')}</div>
+    <p class="dim legend"><span class="cell paid"></span>پرداخت‌شده <span class="cell partial"></span>ناقص <span class="cell late"></span>پرداخت‌نشده <span class="cell upcoming"></span>آینده <span class="cell prepaid"><i>+</i></span>پیش‌پرداخت</p>
+    <p class="dim">نام هر خانه = ماهِ اجاره؛ سررسیدِ آن ماهِ بعد است. خانهٔ قاب‌دار، اجاره‌ای است که این ماه سررسید می‌شود.</p>`;
 }
 
 // ============================================================
