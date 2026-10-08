@@ -224,7 +224,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{fo
 //   • Guarantee cheques are never payments.
 //   • Partner settlement is on a CASH basis per Jalali year.
 // ============================================================
-const APP_VERSION='v1.9';
+const APP_VERSION='v1.10';
 const FA='۰۱۲۳۴۵۶۷۸۹';
 const MFA=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const MSH=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -1071,7 +1071,7 @@ async function boot(){
   render();
   setTimeout(()=>{initFirebase().then(refreshCloudUI);},1500);
   setTimeout(()=>{if(ghOn()&&(Date.now()-(+localStorage.getItem(GH_LAST)||0))>6*3600e3)ghBackup(true);},6000);
-  setTimeout(()=>{if(ghOn())fetchBridge();},3000);
+  setTimeout(()=>{if(ghOn()){fetchBridge();ghDepPublish();}},3000);
   if('serviceWorker' in navigator&&location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
@@ -1301,7 +1301,18 @@ async function ghInboxRemove(id){
 }
 function copyTok(id){const v=val(id);if(!v)return ntf('توکنی وارد نشده');
   (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>ntf('توکن کپی شد؛ در اپ دیگر بچسبانید')).catch(()=>{const el=$(id);el.type='text';el.select();ntf('توکن را انتخاب و کپی کنید');});}
-function ghSchedule(){if(!ghOn())return;clearTimeout(ghTimer);ghTimer=setTimeout(()=>ghBackup(true),15000);}
+function ghSchedule(){if(!ghOn())return;clearTimeout(ghTimer);ghTimer=setTimeout(()=>{ghBackup(true);ghDepPublish();},15000);}
+// v1.10: publish deposits held to amlak-status.json so «سرمایه» can compare with its own deposit records
+// (deposits collected by a partner are listed but not counted — they never reached your accounts)
+function depStatus(){const L=depositsHeld().map(c=>{const p=propOf(c.propertyId);const prt=!!(p&&p.collector==='partner');
+  return{n:tenName(c)+' — '+propName(c)+(prt?` (نزد ${p.partner||'شریک'}؛ در جمع نیست)`:''),dep:c.deposit,prt:prt?1:0};});
+  return{deposits:L.filter(x=>!x.prt).reduce((s,x)=>s+x.dep,0),list:L};}
+async function ghDepPublish(){
+  if(!ghOn())return false;const st=depStatus();const key=JSON.stringify(st);if(localStorage.getItem('amlak_dep_pub')===key)return true;
+  try{let sha;const g=await ghFetch('/contents/amlak-status.json');if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)return false;
+    const p=await ghFetch('/contents/amlak-status.json',{method:'PUT',body:JSON.stringify({message:'املاک — ودیعه‌ها',content:b2s(new TextEncoder().encode(JSON.stringify({v:1,at:Date.now(),...st}))),sha})});
+    if(p.ok){localStorage.setItem('amlak_dep_pub',key);return true;}}catch(e){}
+  return false;}
 function ghStatusText(){if(!ghOn())return 'غیرفعال — بدون VPN کار می‌کند';const c=ghCfg();const l=+localStorage.getItem(GH_LAST)||0;
   return `فعال — ${c.owner}/${c.repo}${c.pass?'، رمزنگاری‌شده':''}؛ `+(l?'آخرین پشتیبان '+new Date(l).toLocaleString('fa-IR'):'هنوز پشتیبانی ثبت نشده');}
 function openGhSheet(){
