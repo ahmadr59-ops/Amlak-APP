@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#15243F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="املاک">
-<title>املاک — دفتر اجاره</title>
+<meta name="apple-mobile-web-app-title" content="صرافی">
+<title>صرافی — دفتر یورو</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-32.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -192,23 +192,38 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{fo
 .ygrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px 4px;margin-top:10px;width:100%}
 .mcell.cur em{font-weight:900;color:var(--ink,#1C2B45);text-decoration:underline;text-underline-offset:3px}
 .legend{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.legend .cell{flex:none;width:14px;height:14px;display:inline-block;margin-inline-start:6px}
+/* صرافی */
+.eye{background:rgba(255,255,255,.14);border:0;border-radius:12px;width:40px;height:34px;font-size:17px;cursor:pointer}
+.tabs .plus{flex:0 0 auto;width:52px;height:52px;margin:-14px 6px 0;border-radius:50%;background:var(--brass,#B08D3E);color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.tabs .plus{justify-content:center;padding:0;gap:0}
+.tabs .plus svg{stroke:#fff;width:26px;height:26px;display:block;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.info{border:0;background:none;color:var(--brass,#B08D3E);font-size:19px;line-height:1;cursor:pointer;padding:2px 6px;vertical-align:middle}
+.info.inv{color:rgba(255,255,255,.85);font-size:21px}
+.ratebox{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:14px;margin:12px 0}
+.ratebox.stale{border-color:#D98E04;background:linear-gradient(0deg,rgba(217,142,4,.07),rgba(217,142,4,.07)),var(--card)}
+.rb-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.rb-top small{flex-basis:100%;font-size:12.5px;color:var(--ink2,#5B6478)}
+.rb-top b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}.rb-top em{font-style:normal;font-size:12.5px;color:var(--ink2,#5B6478)}
+.rb-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px}.rb-in .btn{margin:0;padding:0 18px}
+.rb-in input{width:100%;padding:11px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg,#fff);font-size:16px}
+.rb-warn{margin:10px 0 0;font-size:13px;font-weight:700;color:#B26F00}
 </style>
 </head>
 <body>
 <header class="hdr">
   <img src="icon-192.png" alt="">
-  <div><h1>املاک</h1><p id="hdate">دفتر اجاره و مطالبات</p></div>
+  <div><h1>صرافی</h1><p id="hdate">دفتر یورو</p></div>
   <div class="sp"></div>
-  <span id="hcloud" class="cdot" title="پشتیبان ابری"></span>
   <button class="ibtn" onclick="openSettings()" aria-label="تنظیمات"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg></button>
 </header>
 <main id="view"></main>
 <nav class="tabs"><div>
-  <button data-t="today" onclick="go('today')"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>امروز</button>
-  <button data-t="props" onclick="go('props')"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-5h4v5"/></svg>املاک</button>
-  <button data-t="tenants" onclick="go('tenants')"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0"/><path d="M16 4.5a3.5 3.5 0 010 7M21.5 20a6.5 6.5 0 00-4-6"/></svg>مستأجران</button>
-  <button data-t="cheques" onclick="go('cheques')"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 14h6M15 10h3"/></svg>چک‌ها</button>
-  <button data-t="reports" onclick="go('reports')"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>گزارش</button>
+  <button data-t="home" onclick="go('home')"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>خانه</button>
+  <button data-t="deals" onclick="go('deals')"><svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4M21 7H9M7 21l-4-4 4-4M3 17h12"/></svg>معاملات</button>
+  <button class="plus" onclick="openDeal()" aria-label="معاملهٔ جدید"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button data-t="vault" onclick="go('vault')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5v-1M15.5 12h1"/></svg>صندوق</button>
+  <button data-t="report" onclick="go('report')"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>گزارش</button>
 </div></nav>
 <div id="ov" class="ov" onclick="if(event.target===this)closeSheet()"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -224,7 +239,7 @@ input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{fo
 //   • Guarantee cheques are never payments.
 //   • Partner settlement is on a CASH basis per Jalali year.
 // ============================================================
-const APP_VERSION='v1.10';
+const APP_VERSION='v1.6';
 const FA='۰۱۲۳۴۵۶۷۸۹';
 const MFA=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const MSH=['فرو','ارد','خرد','تیر','مرد','شهر','مهر','آبا','آذر','دی','بهم','اسف'];
@@ -277,983 +292,327 @@ function fmtD(d){return d?`${toFa(d.d)} ${MFA[d.m]} ${toFa(d.y)}`:'—';}
 function fmtM(idx){return `${MFA[idx%12]} ${toFa(Math.floor(idx/12))}`;}
 
 // ---------------- State ----------------
-function def(){return{
-  schemaVersion:1,
-  properties:[],tenants:[],contracts:[],payments:[],cheques:[],settlements:[],
-  settings:{remindDays:2,smsTpl:DEFAULT_SMS,theme:'auto',lastBackup:null},
-  dismissed:{},bridge:[],bridgeDone:{}
-};}
+
+// ============================================================
+// صرافی — personal euro ledger (euros held by Sahar, toman settled in Iran)
+// Rules:  • the euro side counts only once confirmed (eurDone);
+//         • cost basis = moving average (opening + confirmed buys, at the agreed toman);
+//         • a sell realises (its toman − average cost × €); revaluation is never income.
+// ============================================================
+function def(){return{v:1,settings:{theme:'auto',lastBackup:0},opening:null,rates:[],deals:[],counts:[],bridge:[],bridgeDone:{}};}
 let ST=def();
-// Defaults only FILL missing keys; saved values always win (schemaVersion explicit).
 function normalize(s){
-  const o=Object.assign(def(),s||{});
-  o.settings=Object.assign(def().settings,(s&&s.settings)||{});
-  ['properties','tenants','contracts','payments','cheques','settlements'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
-  if(!o.dismissed||typeof o.dismissed!=='object') o.dismissed={};
-  if(!Array.isArray(o.bridge)) o.bridge=[];
-  if(!o.bridgeDone||typeof o.bridgeDone!=='object') o.bridgeDone={};
-  o.schemaVersion=(s&&s.schemaVersion)||1;
+  const o=Object.assign(def(),s||{});o.settings=Object.assign(def().settings,o.settings||{});
+  ['rates','deals','counts','bridge'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});if(!o.bridgeDone||typeof o.bridgeDone!=='object')o.bridgeDone={};
+  o.deals.forEach(d=>{if(!Array.isArray(d.pays))d.pays=[];});
   return o;
 }
-
-// ---------------- Lookups ----------------
-const byId=(a,id)=>a.find(x=>x.id===id)||null;
-function propOf(id){return byId(ST.properties,id);}
-function tenOf(id){return byId(ST.tenants,id);}
-function ctrOf(id){return byId(ST.contracts,id);}
-function contractsOfProp(pid){return ST.contracts.filter(c=>c.propertyId===pid);}
-function activeContractOf(pid){const a=contractsOfProp(pid).filter(c=>c.status==='active');return a[a.length-1]||null;}
-function activeContracts(){return ST.contracts.filter(c=>c.status==='active');}
-function paymentsOf(cid){return ST.payments.filter(p=>p.contractId===cid).sort((a,b)=>cmpD(a.date,b.date)||(a.id<b.id?-1:1));}
-
-// ---------------- Contract schedule ----------------
-function pFirst(p){return p.sy*12+p.sm+1;}
-function pLast(p){return p.sy*12+p.sm+(p.dur||12);}
-function lastIdx(c){let mx=-1;(c.periods||[]).forEach(p=>{mx=Math.max(mx,pLast(p));});if(c.endIdx!=null)mx=Math.min(mx,c.endIdx);return mx;}
-function charges(c){
-  const li=lastIdx(c),out=[];
-  (c.periods||[]).forEach(p=>{
-    for(let i=1;i<=(p.dur||12);i++){
-      const idx=p.sy*12+p.sm+i; if(idx>li) break;
-      const y=Math.floor(idx/12),m=idx%12;
-      out.push({idx,y,m,d:Math.min(p.sd||1,jMonthLen(y,m)),amount:p.rent||0});
-    }
+const byId=(arr,id)=>arr.find(x=>x.id===id);
+const tom=d=>Math.round((d.eur||0)*(d.rate||0));
+const paidT=d=>d.pays.reduce((s,p)=>s+(p.amount||0),0);
+const remT=d=>tom(d)-paidT(d);
+function lastRate(){return ST.rates.slice().sort((a,b)=>cmpD(b.date,a.date)||(b.at||0)-(a.at||0))[0]||null;}
+function vault(){
+  let eur=0,cost=0,realized=0;
+  if(ST.opening){eur=ST.opening.eur||0;cost=ST.opening.cost||0;}
+  ST.deals.filter(d=>d.eurDone).sort((a,b)=>cmpD(a.eurDate||a.date,b.eurDate||b.date)||(a.at||0)-(b.at||0)).forEach(d=>{
+    if(d.kind==='buy'){eur+=d.eur;cost+=tom(d);}
+    else{const avg=eur>0?cost/eur:0;const c=avg*d.eur;realized+=tom(d)-c;cost-=c;eur-=d.eur;}
   });
-  return out.sort((a,b)=>a.idx-b.idx);
+  const r=lastRate(),mkt=r?r.rate:0,avg=eur>0?cost/eur:0;
+  return{eur,cost:Math.round(cost),avg:Math.round(avg),realized:Math.round(realized),mkt,value:Math.round(eur*mkt),unreal:mkt?Math.round(eur*mkt-cost):null};
 }
-function currentRent(c){
-  const ch=charges(c);if(!ch.length)return 0;
-  const cur=ch.find(x=>x.idx===tIdx());return cur?cur.amount:ch[ch.length-1].amount;
+// What is still open between you and the other side
+function exposures(){
+  const o={iOwe:[],owedMe:[],eurOwedMe:[],eurIOwe:[]};
+  ST.deals.forEach(d=>{const rem=remT(d),pd=paidT(d);
+    if(d.kind==='buy'){if(d.eurDone&&rem>0)o.iOwe.push({d,amt:rem});if(!d.eurDone&&pd>0)o.eurOwedMe.push({d,amt:d.eur});}
+    else{if(d.eurDone&&rem>0)o.owedMe.push({d,amt:rem});if(!d.eurDone&&pd>0)o.eurIOwe.push({d,amt:d.eur});}});
+  return o;
 }
-// Rent is paid in arrears: the charge due in month idx is the rent OF month idx-1
-function covM(idx){return ((idx-1)%12+12)%12;}
-function needsRenewal(c,asOf){return c.status==='active'&&tIdx(asOf)>=lastIdx(c);}
-
-// v1.6 ledger: every payment belongs to ITS OWN month.
-//  1) target = the month you chose (p.target), else the month whose due date is nearest to the
-//     payment date (±20 days) that still has something unpaid;
-//  2) anything left over goes to the oldest unpaid month first, then to future months (prepayment);
-//  3) beyond the schedule → credit.  An unpaid month therefore stays red on its own.
-//  Totals (due, paid, balance) are identical to the old FIFO ledger; only the per-month split differs.
-//  Computed (not stored), so it can never drift when a contract or payment is edited.
-function payTarget(ch,p){
-  if(p.target!=null){const t=ch.find(x=>x.idx===p.target);if(t)return t;}
-  const dp=dayNum(p.date);let best=null,bd=21;
-  ch.forEach(x=>{const d=Math.abs(dayNum(x)-dp);if(d<bd&&x.paid<x.amount){best=x;bd=d;}});
-  return best;
+const isDone=d=>d.eurDone&&remT(d)<=0;
+function addDeal(x){
+  const eur=+x.eur,rate=+x.rate;if(!(eur>0))throw new Error('مقدار یورو را وارد کنید');if(!(rate>0))throw new Error('نرخ را وارد کنید');
+  const d={id:uid(),kind:x.kind==='sell'?'sell':'buy',date:x.date,party:(x.party||'').trim(),eur,rate,mkt:+x.mkt||0,note:(x.note||'').trim(),eurDone:false,eurDate:null,pays:[],at:Date.now()};
+  ST.deals.push(d);return d;
 }
-function ledger(c,asOf){
-  asOf=asOf||today();
-  const ch=charges(c).map(x=>({...x,paid:0,due:cmpD(x,asOf)<=0}));
-  const pays=paymentsOf(c.id);
-  const cover={};let credit=0,totalPaid=0;
-  pays.forEach(p=>{
-    let left=p.amount;totalPaid+=p.amount;cover[p.id]=[];
-    const put=x=>{const a=Math.min(x.amount-x.paid,left);if(a>0){x.paid+=a;left-=a;cover[p.id].push(x.idx);}};
-    const t=payTarget(ch,p);if(t)put(t);
-    for(const x of ch){if(left<=0)break;put(x);}
-    credit+=left;
-  });
-  // v1.5: a month that is not due yet is never a warning — partial money there is a prepayment
-  ch.forEach(x=>{x.status=x.paid>=x.amount?'paid':!x.due?(x.paid>0?'prepaid':'upcoming'):(x.paid>0?'partial':'late');});
-  const dueTotal=ch.filter(x=>x.due).reduce((s,x)=>s+x.amount,0);
-  return{charges:ch,totalPaid,dueTotal,balance:dueTotal-totalPaid,credit,cover};
+function addPay(dealId,p){const d=byId(ST.deals,dealId);if(!d)throw new Error('معامله پیدا نشد');const a=+p.amount;if(!(a>0))throw new Error('مبلغ نامعتبر است');
+  if(d.pays.length>=3&&!p.force)throw new Error('حداکثر سه ردیف پرداخت برای هر معامله');
+  const r={id:uid(),date:p.date,amount:a,ref:(p.ref||'').trim()};d.pays.push(r);return r;}
+function setEurDone(dealId,done,date){const d=byId(ST.deals,dealId);d.eurDone=!!done;d.eurDate=done?(date||today()):null;}
+function addRate(rate,date){const r=+rate;if(!(r>0))throw new Error('نرخ نامعتبر است');ST.rates.push({id:uid(),date:date||today(),rate:r,at:Date.now()});}
+function addCount(eur,date,note){const v=vault();const c={id:uid(),date:date||today(),eur:+eur,expected:v.eur,note:note||'',at:Date.now()};ST.counts.push(c);return c;}
+// Net euro position in toman — what «سرمایه»'s «ارز (یورو)» account should hold, given that Sarmaye
+// moves tomans when they are paid while the safe changes only when Sahar confirms.
+function bridgeTarget(){
+  const v=vault();let t=v.mkt?v.value:v.cost;
+  ST.deals.forEach(d=>{const pd=paidT(d),rem=Math.max(0,remT(d));
+    if(d.kind==='buy'){if(d.eurDone)t-=rem;else t+=pd;}else{if(d.eurDone)t+=rem;else t-=pd;}});
+  return Math.round(t);
 }
-function aging(c,asOf){
-  asOf=asOf||today();const L=ledger(c,asOf);const b={a:0,b:0,c:0};
-  L.charges.forEach(x=>{
-    if(!x.due)return;const rem=x.amount-x.paid;if(rem<=0)return;
-    const days=dayNum(asOf)-dayNum(x);
-    if(days<=30)b.a+=rem;else if(days<=60)b.b+=rem;else b.c+=rem;
-  });
-  return b;
+// ready once real euros are on record: an opening balance OR at least one confirmed deal (history entered deal by deal)
+// the same number, itemised — shown in «صندوق» so the value in «سرمایه» is never a mystery
+function bridgeParts(){
+  const v=vault();const p={base:v.mkt?v.value:v.cost,baseAtCost:!v.mkt,paidInTransit:0,owedByMe:0,owedToMe:0,receivedEarly:0};
+  ST.deals.forEach(d=>{const pd=paidT(d),rem=Math.max(0,remT(d));
+    if(d.kind==='buy'){if(d.eurDone)p.owedByMe+=rem;else p.paidInTransit+=pd;}else{if(d.eurDone)p.owedToMe+=rem;else p.receivedEarly+=pd;}});
+  p.target=Math.round(p.base+p.paidInTransit-p.owedByMe+p.owedToMe-p.receivedEarly);return p;
 }
-
-// ---------------- Mutations (return value or throw Error with Persian msg) ----------------
-function addPayment({contractId,amount,date,method,note,chequeId,target}){
-  if(!ctrOf(contractId)) throw new Error('قرارداد یافت نشد');
-  if(!(amount>0)) throw new Error('مبلغ باید بزرگتر از صفر باشد');
-  if(!date) throw new Error('تاریخ نامعتبر است');
-  const p={id:uid(),contractId,date,amount,method:method||'transfer',chequeId:chequeId||null,note:note||'',legacyPeriod:null};
-  if(target!=null&&target!=='')p.target=+target;
-  ST.payments.push(p);return p;
-}
-function delPayment(id){
-  const p=byId(ST.payments,id);if(!p)return;
-  ST.payments=ST.payments.filter(x=>x.id!==id);
-  if(p.chequeId){const q=byId(ST.cheques,p.chequeId);if(q){q.status='pending';q.statusDate=null;q.paymentId=null;}}
-}
-const CHQ_OK={rent:['pending','cleared','bounced'],guarantee:['held','returned']};
-function setChequeStatus(id,status,date){
-  const q=byId(ST.cheques,id);if(!q) throw new Error('چک یافت نشد');
-  if(!CHQ_OK[q.kind].includes(status)) throw new Error('وضعیت نامعتبر');
-  if(q.kind==='rent'){
-    if(status==='cleared'&&!q.paymentId){
-      const p=addPayment({contractId:q.contractId,amount:q.amount,date:date||q.due,method:'cheque',chequeId:q.id,note:'چک '+(q.number||'')});
-      q.paymentId=p.id;
-    }
-    if(status!=='cleared'&&q.paymentId){ST.payments=ST.payments.filter(p=>p.id!==q.paymentId);q.paymentId=null;}
-  }
-  q.status=status;q.statusDate=(status==='pending'||status==='held')?null:(date||today());
-}
-function delCheque(id){
-  const q=byId(ST.cheques,id);if(!q)return;
-  if(q.paymentId) ST.payments=ST.payments.filter(p=>p.id!==q.paymentId);
-  ST.cheques=ST.cheques.filter(x=>x.id!==id);
-}
-function delContract(cid){
-  ST.payments=ST.payments.filter(p=>p.contractId!==cid);
-  ST.cheques=ST.cheques.filter(q=>q.contractId!==cid);
-  ST.contracts=ST.contracts.filter(c=>c.id!==cid);
-}
-function delProperty(pid){contractsOfProp(pid).forEach(c=>delContract(c.id));ST.properties=ST.properties.filter(p=>p.id!==pid);}
-
-// ---------------- Reminders ----------------
-function reminders(asOf){
-  asOf=asOf||today();
-  // v1.4: remind only when rent is still unpaid `grace` days AFTER its due date (default 2)
-  const grace=Math.max(0,ST.settings.remindDays??2),ai=tIdx(asOf),items=[];
-  activeContracts().forEach(c=>{
-    const L=ledger(c,asOf);
-    const late=L.charges.filter(x=>x.due&&x.paid<x.amount&&dayNum(asOf)-dayNum(x)>=grace);
-    if(late.length) items.push({key:`late_${c.id}_${ai}`,type:'late',cid:c.id,amount:L.balance,first:late[0],count:late.length,days:dayNum(asOf)-dayNum(late[0])});
-    if(needsRenewal(c,asOf)) items.push({key:`renew_${c.id}_${lastIdx(c)}_${ai}`,type:'renew',cid:c.id,last:lastIdx(c)});
-  });
-  ST.cheques.filter(q=>q.kind==='rent'&&q.status==='pending'&&cmpD(q.due,asOf)<=0).forEach(q=>{   // cheques: on their date (time to deposit)
-    const days=dayNum(q.due)-dayNum(asOf);
-    items.push({key:`chq_${q.id}_${days<0?'late':'up'}`,type:'cheque',qid:q.id,cid:q.contractId,amount:q.amount,days});
-  });
-  const live=new Set(items.map(i=>i.key));
-  Object.keys(ST.dismissed).forEach(k=>{if(!live.has(k))delete ST.dismissed[k];}); // self-cleaning
-  return items.filter(i=>!ST.dismissed[i.key]);
-}
-function smsText(cid,asOf){
-  asOf=asOf||today();
-  const c=ctrOf(cid),t=tenOf(c.tenantId),p=propOf(c.propertyId),L=ledger(c,asOf);
-  const late=L.charges.filter(x=>x.due&&x.paid<x.amount);
-  const ref=late[0]||L.charges.find(x=>x.paid<x.amount);
-  if(!ref) return '';
-  const amount=late.length?L.balance:ref.amount-ref.paid;
-  const months=late.length>1?late.map(x=>MFA[x.m]).join('، '):MFA[ref.m]+' '+toFa(ref.y);
-  return (ST.settings.smsTpl||DEFAULT_SMS)
-    .replace(/{نام}/g,t?t.name:'').replace(/{ملک}/g,p?p.name:'')
-    .replace(/{مبلغ}/g,nf(amount)).replace(/{ماه}/g,months)
-    .replace(/{سررسید}/g,fmtD(ref)).replace(/{وضعیت}/g,late.length?'شده است':'می‌شود');
-}
-
-// ---------------- Property & portfolio metrics ----------------
-function collectedCash(pid,y){
-  return ST.payments.reduce((s,p)=>{const c=ctrOf(p.contractId);return s+((c&&c.propertyId===pid&&p.date.y===y)?p.amount:0);},0);
-}
-function yields(pid,y){
-  const p=propOf(pid),c=activeContractOf(pid);
-  if(!p||!(p.value>0)||!c) return null;
-  const rent=currentRent(c)*12;
-  return{
-    gross:rent/p.value*100,
-    eff:(c.deposit>0&&p.value>c.deposit)?rent/(p.value-c.deposit)*100:null,
-    real:collectedCash(pid,y)/p.value*100
-  };
-}
-function partnerBalances(y){
-  const map={};const get=n=>map[n]||(map[n]={partner:n,fromPartner:0,toPartner:0,settledIn:0,settledOut:0,props:[]});
-  ST.properties.forEach(p=>{
-    if(!(p.myShare<100)||!(p.partner||'').trim()) return;
-    const col=collectedCash(p.id,y),s=p.myShare/100,r=get(p.partner.trim());
-    r.props.push(p.name);
-    if(p.collector==='partner') r.fromPartner+=col*s; else r.toPartner+=col*(1-s);
-  });
-  ST.settlements.filter(x=>x.year===y).forEach(x=>{const r=get((x.partner||'').trim());if(x.dir==='in')r.settledIn+=x.amount;else r.settledOut+=x.amount;});
-  return Object.values(map).map(r=>({...r,net:Math.round(r.fromPartner-r.toPartner-r.settledIn+r.settledOut)}));
-}
-function depositsHeld(){return ST.contracts.filter(c=>c.deposit>0&&c.depReceived&&!c.depReturned);}
-
-// ---------------- Calendar export (.ics) ----------------
-function icsEsc(s){return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');}
-function buildICS(asOf){
-  asOf=asOf||today();
-  const n=Math.max(0,ST.settings.remindDays??2);
-  const pre='PT9H'; // v1.4: all-day event on due+n days, alarm at 09:00
-  const ymd=d=>{const g=jToG(d.y,d.m,d.d);return g.getUTCFullYear()+String(g.getUTCMonth()+1).padStart(2,'0')+String(g.getUTCDate()).padStart(2,'0');};
-  const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
-  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Amlak//FA','CALSCALE:GREGORIAN','X-WR-CALNAME:املاک'];
-  const ev=(uidv,d,sum,desc)=>{L.push('BEGIN:VEVENT',`UID:${uidv}@amlak`,`DTSTAMP:${stamp}`,`DTSTART;VALUE=DATE:${ymd(d)}`,`DTEND;VALUE=DATE:${ymd(addDays(d,1))}`,
-    `SUMMARY:${icsEsc(sum)}`,`DESCRIPTION:${icsEsc(desc)}`,
-    'BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc(sum)}`,`TRIGGER:${pre}`,'END:VALARM',
-    'BEGIN:VALARM','ACTION:DISPLAY',`DESCRIPTION:${icsEsc(sum)}`,'TRIGGER:PT9H','END:VALARM','END:VEVENT');};
-  let count=0;const horizon=tIdx(asOf)+12;
-  activeContracts().forEach(c=>{
-    const p=propOf(c.propertyId),t=tenOf(c.tenantId);
-    ledger(c,asOf).charges.forEach(x=>{
-      if(x.paid>=x.amount||x.idx>horizon||x.idx<tIdx(asOf)) return;
-      ev(`r-${c.id}-${x.idx}`,addDays(x,n),`پیگیری اجاره ${p?p.name:''} (${t?t.name:''})`,`اگر هنوز پرداخت نشده: ${nf(x.amount-x.paid)} تومان — سررسید ${fmtD(x)}`);count++;
-    });
-  });
-  ST.cheques.filter(q=>q.kind==='rent'&&q.status==='pending'&&cmpD(q.due,asOf)>=0).forEach(q=>{
-    const c=ctrOf(q.contractId),t=c?tenOf(c.tenantId):null;
-    ev(`q-${q.id}`,q.due,`سررسید چک ${t?t.name:''}`,`مبلغ: ${nf(q.amount)} تومان، شماره ${q.number||'—'}`);count++;
-  });
-  L.push('END:VCALENDAR');
-  return{text:L.join('\r\n'),count};
-}
-
-// ---------------- Import from «سرمایه» ----------------
-function importSarmaye(data){
-  if(!data||data.type!=='sarmaye-rent-export') throw new Error('این فایل، خروجی اجارهٔ «سرمایه» نیست');
-  const S=def();S.settings=Object.assign({},ST.settings);
-  (data.properties||[]).forEach(p=>S.properties.push({id:p.id,name:p.name||p.unit||'ملک',address:p.address||'',
-    type:p.type==='commercial'?'com':'res',value:+p.value||0,myShare:100,collector:'me',partner:'',note:p.note||''}));
-  (data.tenants||[]).forEach(t=>S.tenants.push({id:t.id,name:t.name||'',phone:t.phone||'',note:t.note||''}));
-  (data.rentalContracts||[]).forEach(c=>{
-    const term=c.status==='terminated';
-    const ta=c.terminatedAt&&typeof c.terminatedAt==='object'&&c.terminatedAt.y?c.terminatedAt:null;
-    S.contracts.push({id:c.id,propertyId:c.propertyId,tenantId:c.tenantId,
-      periods:(c.periods||[]).map(p=>({sd:+p.sd||1,sm:+p.sm||0,sy:+p.sy,dur:+p.dur||12,rent:+p.rent||0})),
-      deposit:+c.deposit||0,depReceived:c.depositReceivedDate||null,depReturned:c.depositReturnedDate||null,
-      status:term?'ended':'active',endIdx:ta?ta.y*12+ta.m:null,note:c.note||''});
-  });
-  let skipped=0;
-  (data.rentPayments||[]).forEach(p=>{
-    if(!S.contracts.some(c=>c.id===p.contractId)||!(+p.amount>0)){skipped++;return;}
-    const date=p.payDate&&p.payDate.y?p.payDate:(p.rentPeriod?{y:p.rentPeriod.y,m:p.rentPeriod.m,d:1}:null);
-    if(!date){skipped++;return;}
-    S.payments.push({id:p.id||uid(),contractId:p.contractId,date,amount:+p.amount,method:'',chequeId:null,note:p.note||'',legacyPeriod:p.rentPeriod||null});
-  });
-  const sum=(a,f)=>a.reduce((s,x)=>s+(+f(x)||0),0);
-  const src={props:(data.properties||[]).length,tenants:(data.tenants||[]).length,contracts:(data.rentalContracts||[]).length,
-    payments:(data.rentPayments||[]).length,paySum:sum(data.rentPayments||[],x=>x.amount),depSum:sum(data.rentalContracts||[],x=>x.deposit)};
-  const dst={props:S.properties.length,tenants:S.tenants.length,contracts:S.contracts.length,
-    payments:S.payments.length,paySum:sum(S.payments,x=>x.amount),depSum:sum(S.contracts,x=>x.deposit)};
-  const ok=src.props===dst.props&&src.tenants===dst.tenants&&src.contracts===dst.contracts&&src.payments===dst.payments&&src.paySum===dst.paySum&&src.depSum===dst.depSum;
-  return{state:S,rec:{src,dst,ok,skipped}};
-}
-
-// ---------------- Bridge from «سرمایه» (rent deposits detected in bank SMS) ----------------
-// Rank active contracts for an incoming amount: exact arrears match, then exact
-// next-due match, then exact current rent, then the rest.
-function bridgeCandidates(amount,asOf){
-  return activeContracts().map(c=>{
-    const L=ledger(c,asOf);const next=L.charges.find(x=>x.paid<x.amount);
-    const nextDue=next?next.amount-next.paid:0;
-    const score=(L.balance===amount?3:0)+(nextDue===amount?2:0)+(currentRent(c)===amount?1:0);
-    return{c,score,balance:L.balance,nextDue};
-  }).sort((a,b)=>b.score-a.score||b.balance-a.balance);
+const bridgeReady=()=>!!(ST.opening&&(ST.opening.eur>0||ST.deals.some(d=>d.eurDone)));
+function monthSummary(y,m){
+  const L=ST.deals.filter(d=>d.date.y===y&&d.date.m===m);
+  return{buyE:L.filter(d=>d.kind==='buy').reduce((s,d)=>s+d.eur,0),buyT:L.filter(d=>d.kind==='buy').reduce((s,d)=>s+tom(d),0),
+         sellE:L.filter(d=>d.kind==='sell').reduce((s,d)=>s+d.eur,0),sellT:L.filter(d=>d.kind==='sell').reduce((s,d)=>s+tom(d),0),n:L.length};
 }
 
 // ============================================================
-// UI LAYER
+// UI LAYER — صرافی
 // ============================================================
-let TAB='today', RY=today().y, CHQ_F='open';
+let TAB='home',SHOW=false,DF='open';
 const $=id=>document.getElementById(id);
 const val=id=>{const e=$(id);return e?e.value:'';};
-
-// ---------------- Persistence (IndexedDB, localStorage fallback) ----------------
-const DBN='amlak',STORE='kv';
+const DBN='sarafi',STORE='kv';
 function idb(){return new Promise((res,rej)=>{const r=indexedDB.open(DBN,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
 async function dbGet(k){const db=await idb();return new Promise((res,rej)=>{const q=db.transaction(STORE,'readonly').objectStore(STORE).get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
 async function dbSet(k,v){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
-async function loadState(){
-  try{ST=normalize(await dbGet('state'));}
-  catch(e){try{ST=normalize(JSON.parse(localStorage.getItem('amlak_state')||'null'));}catch(_){ST=def();}}
-}
-async function sv(noCloud){
-  const snap=JSON.parse(JSON.stringify(ST));
-  try{await dbSet('state',snap);}catch(e){try{localStorage.setItem('amlak_state',JSON.stringify(snap));}catch(_){ntf('ذخیره انجام نشد');}}
-  if(!noCloud&&typeof scheduleCloud==='function') scheduleCloud();
-  if(typeof ghSchedule==='function') ghSchedule();
-}
-
-// ---------------- Small UI helpers ----------------
-function ntf(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(ntf._t);ntf._t=setTimeout(()=>t.classList.remove('on'),2600);}
+async function loadState(){try{ST=normalize(await dbGet('state'));}catch(e){try{ST=normalize(JSON.parse(localStorage.getItem('sarafi_state')||'null'));}catch(_){ST=def();}}}
+let UNDO=null;
+async function sv(){const snap=JSON.parse(JSON.stringify(ST));try{await dbSet('state',snap);}catch(e){try{localStorage.setItem('sarafi_state',JSON.stringify(snap));}catch(_){ntf('ذخیره انجام نشد');}}
+  if(typeof ghSchedule==='function')ghSchedule();if(typeof schedulePublish==='function')schedulePublish();}
+async function commit(fn,msg){const before=JSON.stringify(ST);try{fn();}catch(e){ntf(e.message);return false;}UNDO=before;await sv();closeSheet();render();ntf(msg,true);return true;}
+async function undo(){if(!UNDO)return;ST=normalize(JSON.parse(UNDO));UNDO=null;await sv();render();ntf('بازگردانی شد');}
+function ntf(m,canUndo){const t=$('toast');t.innerHTML=esc(m)+(canUndo?' <button onclick="undo()" style="margin-inline-start:10px;background:none;border:0;color:inherit;font:inherit;font-weight:800;text-decoration:underline">↶ بازگردانی</button>':'');
+  t.classList.add('on');clearTimeout(ntf._t);ntf._t=setTimeout(()=>{t.classList.remove('on');if(canUndo)UNDO=null;},canUndo?6000:2600);}
 function openSheet(html){$('sheet').innerHTML=html;$('ov').classList.add('on');}
 function closeSheet(){$('ov').classList.remove('on');}
 function fmtIn(el){const v=toLn(el.value);el.value=v?nf(v):'';}
-function money(id,v,ph){return `<input id="${id}" inputmode="numeric" autocomplete="off" placeholder="${ph||'۰'}" value="${v?nf(v):''}" oninput="fmtIn(this)">`;}
+function money(id,v,ph,extra){return `<input id="${id}" inputmode="numeric" autocomplete="off" placeholder="${ph||'۰'}" value="${v?nf(v):''}" oninput="fmtIn(this);${extra||''}">`;}
 function dateIn(id,d){d=d||today();return `<div class="dt"><input id="${id}_d" inputmode="numeric" value="${toFa(d.d)}" aria-label="روز"><select id="${id}_m" aria-label="ماه">${MFA.map((n,i)=>`<option value="${i}"${i===d.m?' selected':''}>${n}</option>`).join('')}</select><input id="${id}_y" inputmode="numeric" value="${toFa(d.y)}" aria-label="سال"></div>`;}
 function readDate(id){const d=parseInt(normDigits(val(id+'_d'))),m=parseInt(val(id+'_m')),y=parseInt(normDigits(val(id+'_y')));if(!(y>1300&&y<1500)||isNaN(m)||!(d>=1&&d<=jMonthLen(y,m)))return null;return{y,m,d};}
 function field(label,inner,hint){return `<label class="f"><span>${label}</span>${inner}${hint?`<small>${hint}</small>`:''}</label>`;}
 function sheetHead(t,sub){return `<div class="sh-h"><div><h2>${t}</h2>${sub?`<p>${sub}</p>`:''}</div><button class="x" onclick="closeSheet()" aria-label="بستن">✕</button></div>`;}
 function errIn(id,msg){ntf(msg);const e=$(id)||$(id+'_d');if(e){e.classList.add('err');e.focus();setTimeout(()=>e.classList.remove('err'),1800);}}
-function tenName(c){const t=c?tenOf(c.tenantId):null;return t?t.name:'—';}
-function propName(c){const p=c?propOf(c.propertyId):null;return p?p.name:'—';}
-function applyTheme(){
-  const pref=ST.settings.theme||'auto';
-  const dark=pref==='dark'||(pref==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
-  document.documentElement.dataset.theme=dark?'dark':'light';
-  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=dark?'#0A1222':'#15243F';
-}
-const METHOD={transfer:'کارت/واریز',cash:'نقد',cheque:'چک','':'نامشخص'};
-const ICO={
-  late:'<path d="M12 8v5M12 16.5h.01"/><circle cx="12" cy="12" r="9"/>',
-  upcoming:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  renew:'<path d="M21 12a9 9 0 11-2.6-6.3M21 4v5h-5"/>',
-  cheque:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 14h6M15 10h3"/>',
-  home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-5h4v5"/>',
-  shop:'<path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v12h16V9"/><path d="M3 9h18M9 21v-6h6v6"/>'
-};
+function applyTheme(){const pref=ST.settings.theme||'auto';const dark=pref==='dark'||(pref==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme=dark?'dark':'light';const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=dark?'#0A1222':'#15243F';}
+const ICO={late:'<path d="M12 8v5M12 16.5h.01"/><circle cx="12" cy="12" r="9"/>',up:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',ok:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  in:'<path d="M12 4v13M6 11l6 6 6-6"/><path d="M4 20h16"/>',out:'<path d="M12 20V7M6 13l6-6 6 6"/><path d="M4 4h16"/>',rate:'<path d="M4 17l5-5 4 4 7-8"/><path d="M15 8h5v5"/>'};
 const svg=(k,cls)=>`<svg class="${cls||'ic'}" viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
+const eu=n=>toFa((Math.round(n*100)/100).toLocaleString('en-US').replace(/,/g,'٬'))+' €';
+const mask=s=>SHOW?s:'••••••';
+const kindL=d=>d.kind==='buy'?'یورو گرفتم':'یورو دادم';
 
-// ---------------- Month strip (signature element) ----------------
-function strip(c,y){
-  if(!c) return '';
-  const L=ledger(c),map={};L.charges.forEach(x=>map[x.idx]=x);
-  const ci=tIdx();
-  return `<div class="strip" role="img" aria-label="وضعیت ماه‌های ${toFa(y)}">${MSH.map((s,m)=>{
-    const x=map[y*12+m];const st=x?x.status:'none';
-    return `<i class="c-${st}${y*12+m===ci?' now':''}" title="${MFA[m]}${x?': '+nf(x.paid)+' از '+nf(x.amount):''}">${s}</i>`;}).join('')}</div>`;
-}
-
-// ---------------- Render root ----------------
 function render(){
-  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===TAB));
-  const v={today:vToday,props:vProps,tenants:vTenants,cheques:vCheques,reports:vReports}[TAB]();
-  $('view').innerHTML=v;
+  document.querySelectorAll('.tabs button[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===TAB));
+  $('view').innerHTML=({home:vHome,deals:vDeals,vault:vVault,report:vReport}[TAB])();
 }
 function go(t){TAB=t;render();window.scrollTo(0,0);}
 
-// ---------------- Tab: Today ----------------
-function vToday(){
-  const t=today();
-  if(!ST.properties.length) return `<section class="empty">
-    <h3>دفتر اجاره‌تان خالی است</h3><p>اولین ملک را ثبت کنید، یا داده‌های اجارهٔ «سرمایه» را وارد کنید.</p>
-    <button class="btn pri" onclick="openProp()">ثبت ملک</button>
-    <button class="btn" onclick="openSettings()">ورود از «سرمایه»</button></section>`;
-  let arrears=0;ST.contracts.forEach(c=>{arrears+=Math.max(0,ledger(c).balance);});
-  const ci=tIdx(t);let mExp=0,mGot=0;
-  activeContracts().forEach(c=>{const x=ledger(c).charges.find(h=>h.idx===ci);if(x){mExp+=x.amount;mGot+=x.paid;}});
-  const pct=mExp?Math.min(100,Math.round(mGot/mExp*100)):0;
-  const items=reminders(t);
-  let old30=0;activeContracts().forEach(c=>{const g=aging(c,t);old30+=g.b+g.c;});
-  const soon=ST.cheques.filter(q=>(q.status==='pending')&&dayNum(q.due)-dayNum(t)>0&&dayNum(q.due)-dayNum(t)<=30).sort((a,b)=>cmpD(a.due,b.due));
-  const lb=Math.max(ST.settings.lastBackup||0,ST.settings.lastCloud||0,+(localStorage.getItem('amlak_gh_last')||0));const stale=!lb||(Date.now()-lb)>14*864e5;
-  return `
-  <section class="hero">
-    <p class="hero-l">مطالبات معوق</p>
-    <p class="hero-n ${arrears>0?'is-late':''}">${nf(arrears)}<small>تومان</small></p>
-    <div class="meter"><span style="width:${pct}%"></span></div>
-    <p class="hero-s">اجارهٔ ${MFA[t.m]}: <b>${nf(mGot)}</b> از ${nf(mExp)} وصول شده (${toFa(pct)}٪)</p>
-    <div class="hkpis"><div><small>وصول‌شدهٔ این ماه</small><b>${nf(mGot)}</b></div><div><small>باقی‌ماندهٔ این ماه</small><b>${nf(Math.max(0,mExp-mGot))}</b></div><div><small>معوق بیش از ۳۰ روز</small><b class="${old30>0?'is-late':''}">${nf(old30)}</b></div></div>
+// ---------------- Home ----------------
+function vHome(){
+  if(!ST.opening) return `<section class="empty"><h3>شروع: موجودی صندوق</h3>
+    <p>تعداد یورویی که الان در صندوق دارید و بهای تمام‌شدهٔ کل آن را وارد کنید. بعداً هم قابل اصلاح است.</p>
+    <button class="btn pri" onclick="openOpening()">ثبت موجودی اولیه</button>
+    <button class="btn" onclick="ST.opening={eur:0,cost:0,date:today()};sv().then(render)">از صفر شروع کن</button></section>`;
+  const v=vault(),e=exposures(),r=lastRate(),t=today();
+  const stale=!r||dayNum(t)-dayNum(r.date)>=1;
+  const rows=[];
+  e.iOwe.forEach(x=>rows.push(row('late',`تومانی که بدهکارم — ${esc(x.d.party||'بدون نام')}`,`${nf(x.amt)} تومان؛ یورو ${fmtD(x.d.eurDate||x.d.date)} رسیده`,`openDealView('${x.d.id}')`,'پرداخت')));
+  e.eurOwedMe.forEach(x=>rows.push(row('late',`یورویی که طلبکارم — ${esc(x.d.party||'بدون نام')}`,`${eu(x.amt)}؛ تومان پرداخت شده، سحر هنوز تأیید نکرده`,`openDealView('${x.d.id}')`,'تأیید')));
+  e.owedMe.forEach(x=>rows.push(row('up',`تومانی که طلبکارم — ${esc(x.d.party||'بدون نام')}`,`${nf(x.amt)} تومان؛ یورو تحویل شده`,`openDealView('${x.d.id}')`,'دریافت')));
+  e.eurIOwe.forEach(x=>rows.push(row('up',`یورویی که بدهکارم — ${esc(x.d.party||'بدون نام')}`,`${eu(x.amt)}؛ تومان دریافت شده، یورو هنوز تحویل نشده`,`openDealView('${x.d.id}')`,'تحویل')));
+  const open=ST.deals.filter(d=>!isDone(d)).sort((a,b)=>cmpD(b.date,a.date));
+  return `<section class="hero">
+    <div style="display:flex;justify-content:space-between;align-items:center"><p class="hero-l">موجودی صندوق</p>
+      <button class="eye" onclick="SHOW=!SHOW;render()" aria-label="نمایش یا پنهان کردن">${SHOW?'🙈':'👁'}</button></div>
+    <p class="hero-n">${mask(eu(v.eur))}</p>
+    <p class="hero-s">ارزش روز: <b>${mask(v.mkt?nf(v.value)+' تومان':'— (نرخ ثبت نشده)')}</b>${r?` · با نرخ ${nf(r.rate)} (${rateAge(r)})`:''}</p>
+    <div class="hkpis"><div><small>میانگین بهای هر یورو</small><b>${mask(nf(v.avg))}</b></div><div><small>نرخ روز</small><b>${r?nf(r.rate):'—'}</b></div><div><small>سود/زیان ارزش</small><b class="${v.unreal<0?'is-late':''}">${v.unreal==null?'—':mask((v.unreal<0?'−':'+')+nf(Math.abs(v.unreal)))}</b></div></div>
   </section>
-  ${(ST.bridge||[]).length?`<h3 class="sec">واریزهای ارسالی از «سرمایه»</h3><div class="list">${ST.bridge.map(b=>`<div class="row"><span class="ri r-ok">${svg('upcoming')}</span><div class="rb"><b>${b.kind==='deposit'?(b.dir==='out'?'بازگشت پول پیش ':'پول پیش '):''}${nf(b.a)} تومان</b><small>${esc(b.bank||'')}${b.acc?'، '+esc(b.acc):''}، ${fmtD(b.date)}</small></div>
-    <div class="ra"><button class="mini ok" onclick="openBridge('${b.id}')">ثبت برای مستأجر</button><button class="dis" onclick="bridgeResolve('${b.id}',null)" aria-label="نادیده">✕</button></div></div>`).join('')}</div>`:''}
-  <h3 class="sec">نیاز به اقدام</h3>
-  ${items.length?`<div class="list">${items.map(itemRow).join('')}</div>`:`<p class="calm">موردی برای امروز نیست.</p>`}
-  ${rentRoll(t)}
-  ${soon.length?`<h3 class="sec">چک‌های ۳۰ روز آینده</h3><div class="list">${soon.map(q=>{const c=ctrOf(q.contractId);return `<div class="row"><span class="ri r-chq">${svg('cheque')}</span><div class="rb"><b>${nf(q.amount)} تومان</b><small>${esc(tenName(c))}، سررسید ${fmtD(q.due)}</small></div></div>`;}).join('')}</div>`:''}
-  ${stale?`<button class="nudge" onclick="doBackup()">آخرین پشتیبان ${lb?'بیش از دو هفته پیش':'هنوز گرفته نشده'} — الان پشتیبان بگیرید</button>`:''}`;
+  ${rateCard()}
+  ${ST.bridge.length?`<h3 class="sec">پرداخت‌های ارسالی از «سرمایه»</h3><div class="list">${ST.bridge.map(b=>`<button class="row tap" onclick="openSfBridge('${b.id}')"><span class="ri r-up">${svg(b.kind==='pay'?'out':'in')}</span><div class="rb"><b>${b.kind==='pay'?'پرداخت':'دریافت'} ${nf(b.a)} تومان</b><small>${esc(b.bank||'')}${b.acc?' · '+esc(b.acc):''} · ${fmtD(b.date)} — ${(m=>m?`<b style="color:var(--ok,#1a8f4c)">✓ ظاهراً در معاملهٔ «${esc(m.d.party||'بدون نام')}» ثبت شده</b>`:'لمس کنید تا به معامله وصل شود')(bridgeMatch(b))}</small></div></button>`).join('')}</div>`:''}
+  <h3 class="sec">کارهای من</h3><div class="list">${rows.length?rows.join(''):`<div class="row"><span class="ri r-ok">${svg('ok')}</span><div class="rb"><b>کاری باقی نمانده است</b></div></div>`}</div>
+  <h3 class="sec">معاملات باز</h3>${open.length?`<div class="list">${open.map(dealRow).join('')}</div>`:'<p class="dim">معاملهٔ بازی ندارید.</p>'}
+  <button class="btn pri" onclick="openDeal()">➕ معاملهٔ جدید</button>`;
 }
-function itemRow(it){
-  const c=ctrOf(it.cid);const who=`${esc(tenName(c))}<span class="dim">، ${esc(propName(c))}</span>`;
-  const x=`<button class="dis" onclick="dismiss('${it.key}')" aria-label="نمایش نده">✕</button>`;
-  if(it.type==='late') return `<div class="row"><span class="ri r-late">${svg('late')}</span><div class="rb"><b>${who}</b><small>معوق ${nf(it.amount)} تومان${it.count>1?`، ${toFa(it.count)} ماه`:''}، از ${fmtD(it.first)}</small></div>
-    <div class="ra"><button class="mini ok" onclick="openPay('${it.cid}')">ثبت پرداخت</button><button class="mini" onclick="sendSms('${it.cid}')">پیامک</button>${x}</div></div>`;
-  if(it.type==='upcoming') return `<div class="row"><span class="ri r-up">${svg('upcoming')}</span><div class="rb"><b>${who}</b><small>${nf(it.amount)} تومان، ${it.days===0?'سررسید امروز':toFa(it.days)+' روز دیگر'} (${fmtD(it.first)})</small></div>
-    <div class="ra"><button class="mini ok" onclick="openPay('${it.cid}')">ثبت پرداخت</button><button class="mini" onclick="sendSms('${it.cid}')">پیامک</button>${x}</div></div>`;
-  if(it.type==='renew') return `<div class="row"><span class="ri r-ren">${svg('renew')}</span><div class="rb"><b>${who}</b><small>آخرین ماه قرارداد: ${fmtM(it.last)}</small></div>
-    <div class="ra"><button class="mini ok" onclick="openRenew('${it.cid}')">تمدید</button>${x}</div></div>`;
-  const q=byId(ST.cheques,it.qid);
-  return `<div class="row"><span class="ri r-chq">${svg('cheque')}</span><div class="rb"><b>چک ${who}</b><small>${nf(it.amount)} تومان، ${it.days<0?toFa(-it.days)+' روز گذشته':it.days===0?'سررسید امروز':toFa(it.days)+' روز دیگر'}${q&&q.number?`، شماره ${esc(q.number)}`:''}</small></div>
-    <div class="ra"><button class="mini ok" onclick="chqAct('${it.qid}','cleared')">وصول شد</button><button class="mini bad" onclick="chqAct('${it.qid}','bounced')">برگشتی</button>${x}</div></div>`;
+function row(ic,title,sub,act,btn){return `<div class="row"><span class="ri ${ic==='late'?'r-late':ic==='ok'?'r-ok':'r-up'}">${svg(ic==='rate'?'rate':ic==='late'?'late':'up')}</span><div class="rb"><b>${title}</b><small>${sub}</small></div><div class="ra"><button class="mini ok" onclick="${act}">${btn}</button></div></div>`;}
+function dealRow(d){
+  const rem=remT(d);const chips=`<span class="chip ${d.eurDone?'ok':'bad'}">${d.kind==='buy'?'یورو رسید':'یورو تحویل'} ${d.eurDone?'✓':'✗'}</span><span class="chip ${rem<=0?'ok':'bad'}">${rem<=0?'تومان تسویه ✓':'تومان مانده '+nf(rem)}</span>`;
+  return `<button class="row tap" onclick="openDealView('${d.id}')"><span class="ri ${d.kind==='buy'?'r-ok':'r-up'}">${svg(d.kind==='buy'?'in':'out')}</span><div class="rb"><b>${kindL(d)} · ${eu(d.eur)} · ${esc(d.party||'بدون نام')}</b><small>${fmtD(d.date)} · نرخ ${nf(d.rate)} · ${nf(tom(d))} تومان</small><div class="chips">${chips}</div></div></button>`;
 }
-async function dismiss(k){ST.dismissed[k]=true;await sv();render();}
-
-// ---------------- Tab: Properties ----------------
-function vProps(){
-  const y=today().y;
-  const cards=ST.properties.map(p=>{
-    const c=activeContractOf(p.id);const L=c?ledger(c):null;
-    const share=p.myShare<100?`<span class="chip brass">سهم من ${toFa(p.myShare)}٪</span><span class="chip">${p.collector==='partner'?'وصول: '+esc(p.partner||'شریک'):'وصول: خودم'}</span>`:'';
-    return `<article class="pc" onclick="openProp('${p.id}')">
-      <header><span class="pt">${svg(p.type==='com'?'shop':'home')}</span><div class="pn"><h4>${esc(p.name)}</h4><p>${c?esc(tenName(c)):'<span class="dim">بدون مستأجر</span>'}</p></div>
-      <div class="pr">${c?`<b>${nf(currentRent(c))}</b><small>تومان در ماه</small>`:''}</div></header>
-      ${share?`<div class="chips">${share}</div>`:''}
-      ${c?monthStrip(c,today()):''}
-      ${L&&L.balance>0?`<p class="owe">معوق: ${nf(L.balance)} تومان</p>`:L&&L.balance<0?`<p class="adv">پیش‌پرداخت: ${nf(-L.balance)} تومان</p>`:''}
-    </article>`;}).join('');
-  return `<div class="bar"><h3 class="sec m0">املاک (${toFa(ST.properties.length)})</h3><button class="btn pri sm" onclick="openProp()">ملک جدید</button></div>
-  ${ST.properties.length?`${cards}${rollLegend()}`:`<p class="calm">هنوز ملکی ثبت نشده است.</p>`}`;
+// ---------------- Deals ----------------
+function vDeals(){
+  const L=ST.deals.filter(d=>DF==='all'||!isDone(d)).sort((a,b)=>cmpD(b.date,a.date)||(b.at||0)-(a.at||0));
+  return `<div class="seg"><button class="${DF==='open'?'on':''}" onclick="DF='open';render()">باز</button><button class="${DF==='all'?'on':''}" onclick="DF='all';render()">همه</button></div>
+  ${L.length?`<div class="list">${L.map(dealRow).join('')}</div>`:`<p class="dim">${DF==='open'?'معاملهٔ بازی ندارید.':'هنوز معامله‌ای ثبت نشده.'}</p>`}
+  <button class="btn pri" onclick="openDeal()">➕ معاملهٔ جدید</button>`;
 }
-
-// ---------------- Tab: Tenants ----------------
-function vTenants(){
-  const list=ST.contracts.filter(c=>c.status==='active'||ledger(c).balance!==0)
-    .sort((a,b)=>(a.status===b.status?0:a.status==='active'?-1:1)||ledger(b).balance-ledger(a).balance);
-  if(!list.length) return `<p class="calm">قرارداد فعالی وجود ندارد. از صفحهٔ املاک، برای هر ملک قرارداد ثبت کنید.</p>`;
-  return `<h3 class="sec">مستأجران و مانده حساب</h3><div class="list">${list.map(c=>{const L=ledger(c);
-    return `<button class="row tap" onclick="openStatement('${c.id}')"><span class="ri ${L.balance>0?'r-late':'r-ok'}">${svg(propOf(c.propertyId)&&propOf(c.propertyId).type==='com'?'shop':'home')}</span>
-    <div class="rb"><b>${esc(tenName(c))}${c.status!=='active'?' <span class="chip">پایان‌یافته</span>':''}</b><small>${esc(propName(c))}</small></div>
-    <div class="bal ${L.balance>0?'is-late':L.balance<0?'is-adv':''}">${L.balance===0?'تسویه':nf(Math.abs(L.balance))}<small>${L.balance>0?'بدهکار':L.balance<0?'بستانکار':''}</small></div></button>`;}).join('')}</div>`;
+function openDeal(id,bid){
+  const d=id?byId(ST.deals,id):null;const r=lastRate();const bb=(!d&&bid)?ST.bridge.find(x=>x.id===bid):null;const k=d?d.kind:bb?(bb.kind==='pay'?'buy':'sell'):'buy';
+  openSheet(`${sheetHead(d?'ویرایش معامله':'معاملهٔ جدید')}
+  <div class="seg"><button id="k_buy" class="${k==='buy'?'on':''}" onclick="dk('buy')">یورو می‌گیرم</button><button id="k_sell" class="${k==='sell'?'on':''}" onclick="dk('sell')">یورو می‌دهم</button></div>
+  <p class="dim" id="k_hint">${k==='buy'?'سحر یورو را از طرف می‌گیرد؛ شما تومان را می‌پردازید.':'سحر از صندوق به طرف یورو می‌دهد؛ طرف به شما تومان واریز می‌کند.'}</p>
+  ${bb?`<p class="note">پس از ذخیره، ${bb.kind==='pay'?'پرداخت':'دریافت'} ${nf(bb.a)} تومان (${fmtD(bb.date)}) از «سرمایه» خودکار به این معامله وصل و از فهرست برداشته می‌شود؛ لازم نیست آن را دستی وارد کنید.</p>`:''}
+  ${field('تاریخ',dateIn('d_date',d?d.date:bb?bb.date:today()))}
+  ${field('نام طرف',`<input id="d_party" value="${esc(d?d.party:'')}" autocomplete="off">`)}
+  ${field('مقدار یورو',`<input id="d_eur" inputmode="decimal" value="${d?toFa(d.eur):''}" oninput="dCalc()" autocomplete="off">`)}
+  ${field('نرخ شما (تومان برای هر یورو)',money('d_rate',d?d.rate:0,'',`dCalc()`),r?`نرخ روز: ${nf(r.rate)} (${fmtD(r.date)})`:'نرخ روز ثبت نشده')}
+  ${field('نرخ بازار در همان روز (اختیاری)',money('d_mkt',d?d.mkt:(r?r.rate:0)))}
+  <p class="note" id="d_total"></p>
+  ${field('یادداشت',`<input id="d_note" value="${esc(d?d.note:'')}">`)}
+  <button class="btn pri" onclick="saveDeal('${id||''}')">ذخیره</button>
+  ${d?`<button class="btn danger" onclick="delDeal('${id}')">حذف معامله</button>`:''}`);
+  window._dk=k;window._bid=bb?bb.id:'';dCalc();
 }
-
-// ---------------- Tab: Cheques ----------------
-const CHQ_ST={pending:['در جریان','warn'],cleared:['وصول‌شده','ok'],bounced:['برگشتی','bad'],held:['نزد من','brass'],returned:['عودت‌شده','']};
-function vCheques(){
-  const all=ST.cheques.slice().sort((a,b)=>cmpD(a.due,b.due));
-  const list=CHQ_F==='open'?all.filter(q=>q.status==='pending'||q.status==='held'):all;
-  return `<div class="bar"><div class="seg"><button class="${CHQ_F==='open'?'on':''}" onclick="CHQ_F='open';render()">باز</button><button class="${CHQ_F==='all'?'on':''}" onclick="CHQ_F='all';render()">همه</button></div>
-    <button class="btn pri sm" onclick="openCheque()">چک جدید</button></div>
-  ${list.length?`<div class="list">${list.map(q=>{const c=ctrOf(q.contractId);const s=CHQ_ST[q.status]||['',''];
-    const acts=q.kind==='rent'?(q.status==='pending'?`<button class="mini ok" onclick="chqAct('${q.id}','cleared')">وصول شد</button><button class="mini bad" onclick="chqAct('${q.id}','bounced')">برگشتی</button>`:`<button class="mini" onclick="chqAct('${q.id}','pending')">بازگشت به در جریان</button>`)
-      :(q.status==='held'?`<button class="mini" onclick="chqAct('${q.id}','returned')">عودت شد</button>`:`<button class="mini" onclick="chqAct('${q.id}','held')">نزد من</button>`);
-    return `<div class="row col"><div class="rtop"><span class="ri r-chq">${svg('cheque')}</span><div class="rb"><b>${nf(q.amount)} تومان <span class="chip ${s[1]}">${s[0]}</span></b>
-      <small>${q.kind==='rent'?'چک اجاره':'چک ضمانت'}، ${esc(tenName(c))}، ${esc(propName(c))}</small><small>سررسید ${fmtD(q.due)}${q.number?`، شماره ${esc(q.number)}`:''}${q.bank?`، ${esc(q.bank)}`:''}</small></div></div>
-      <div class="ra">${acts}<button class="mini" onclick="openCheque('${q.id}')">ویرایش</button></div></div>`;}).join('')}</div>`:`<p class="calm">${CHQ_F==='open'?'چک بازی ندارید.':'چکی ثبت نشده است.'}</p>`}`;
+function dk(k){window._dk=k;$('k_buy').classList.toggle('on',k==='buy');$('k_sell').classList.toggle('on',k==='sell');
+  $('k_hint').textContent=k==='buy'?'سحر یورو را از طرف می‌گیرد؛ شما تومان را می‌پردازید.':'سحر از صندوق به طرف یورو می‌دهد؛ طرف به شما تومان واریز می‌کند.';}
+const pEur=()=>parseFloat(normDigits(val('d_eur')).replace(/[٫,]/g,'.'))||0;
+function dCalc(){const t=Math.round(pEur()*toLn(val('d_rate')));$('d_total').textContent=t?`مبلغ تومانی: ${nf(t)} تومان`:'';}
+async function saveDeal(id){
+  const date=readDate('d_date');if(!date)return errIn('d_date','تاریخ نامعتبر است');
+  const eur=pEur(),rate=toLn(val('d_rate'));if(!(eur>0))return errIn('d_eur','مقدار یورو را وارد کنید');if(!(rate>0))return errIn('d_rate','نرخ را وارد کنید');
+  const x={kind:window._dk,date,party:val('d_party'),eur,rate,mkt:toLn(val('d_mkt')),note:val('d_note')};
+  if(id){await commit(()=>{const d=byId(ST.deals,id);Object.assign(d,{kind:x.kind,date,party:x.party.trim(),eur,rate,mkt:x.mkt,note:x.note.trim()});},'معامله ویرایش شد');openDealView(id);}
+  else{let nd;const bid=window._bid||'';const b=bid?ST.bridge.find(z=>z.id===bid):null;
+    const ok=await commit(()=>{nd=addDeal(x);if(b){addPay(nd.id,{date:b.date,amount:b.a,ref:[b.bank,b.acc].filter(Boolean).join(' · '),force:true});ST.bridge=ST.bridge.filter(z=>z.id!==bid);ST.bridgeDone[bid]=1;}},b?'معامله ثبت شد و پرداخت به آن وصل شد':'معامله ثبت شد');
+    window._bid='';if(ok&&b)sfInboxRemove(bid).catch(()=>{});if(nd)openDealView(nd.id);}
 }
-async function chqAct(id,st){
-  try{
-    let d=today();
-    if(st==='cleared'){const q=byId(ST.cheques,id);if(q&&cmpD(q.due,d)>0)d=q.due;}
-    setChequeStatus(id,st,d);await sv();ntf({cleared:'چک وصول و به‌عنوان پرداخت ثبت شد',bounced:'چک برگشتی ثبت شد',pending:'چک به حالت در جریان برگشت',returned:'عودت چک ثبت شد',held:'چک نزد شما ثبت شد'}[st]);render();
-  }catch(e){ntf(e.message);}
+async function delDeal(id){if(!confirm('این معامله حذف شود؟'))return;await commit(()=>{ST.deals=ST.deals.filter(d=>d.id!==id);},'معامله حذف شد');}
+function openDealView(id){
+  const d=byId(ST.deals,id);if(!d)return;const rem=remT(d);const buy=d.kind==='buy';
+  openSheet(`${sheetHead(`${kindL(d)} · ${eu(d.eur)}`,`${esc(d.party||'بدون نام')} · ${fmtD(d.date)}`)}
+  <div class="kpis"><div><small>نرخ شما</small><b>${nf(d.rate)}</b></div><div><small>مبلغ تومانی</small><b>${nf(tom(d))}</b></div>
+   ${d.mkt?`<div><small>نرخ بازار</small><b>${nf(d.mkt)}</b></div><div><small>${buy?'تخفیف نسبت به بازار':'اختلاف با بازار'}</small><b>${nf(Math.round(d.eur*(buy?d.mkt-d.rate:d.rate-d.mkt)))}</b></div>`:''}</div>
+  <h3 class="sec">۱) یورو ${buy?'(سحر از طرف گرفت)':'(سحر به طرف داد)'}</h3>
+  ${d.eurDone?`<div class="row"><span class="ri r-ok">${svg('ok')}</span><div class="rb"><b>تأیید شد</b><small>${fmtD(d.eurDate||d.date)}</small></div><div class="ra"><button class="mini" onclick="eurToggle('${id}',false)">لغو</button></div></div>`
+   :`<div class="row"><span class="ri r-late">${svg('late')}</span><div class="rb"><b>هنوز تأیید نشده</b></div><div class="ra"><button class="mini ok" onclick="eurToggle('${id}',true)">تأیید امروز</button></div></div>`}
+  <h3 class="sec">۲) تومان ${buy?'(شما پرداخت می‌کنید)':'(طرف واریز می‌کند)'} — ${rem<=0?'تسویه ✓':'مانده '+nf(rem)}</h3>
+  <div class="list">${d.pays.map(p=>`<div class="row"><span class="ri r-ok">${svg('ok')}</span><div class="rb"><b>${nf(p.amount)} تومان</b><small>${fmtD(p.date)}${p.ref?' · '+esc(p.ref):''}</small></div><div class="ra"><button class="mini" onclick="delPay('${id}','${p.id}')">حذف</button></div></div>`).join('')}</div>
+  ${rem>0&&d.pays.length<3?`<div class="g2">${field('مبلغ',money('p_amt',rem))}${field(buy?'به کارت / حساب':'از / به حساب',`<input id="p_ref" placeholder="${buy?'مثلاً کارت ۶۰۳۷…':'مثلاً تجارت'}">`)}</div>
+    ${field('تاریخ',dateIn('p_date',today()))}<button class="btn pri" onclick="savePay('${id}')">ثبت ${buy?'پرداخت':'دریافت'}</button>`:''}
+  ${rem>0&&d.pays.length>=3?'<p class="dim">حداکثر سه ردیف پرداخت؛ برای اصلاح، یک ردیف را حذف کنید.</p>':''}
+  ${d.note?`<p class="note">${esc(d.note)}</p>`:''}
+  <div class="acts"><button class="btn" onclick="openDeal('${id}')">ویرایش</button><button class="btn" onclick="shareDeal('${id}')">اشتراک‌گذاری</button></div>`);
 }
-
-// ---------------- Tab: Reports ----------------
-function vReports(){
-  const y=RY,t=today();
-  let cash=0,mine=0,exp=0,alloc=0;const ag={a:0,b:0,c:0};
-  ST.properties.forEach(p=>{const col=collectedCash(p.id,y);cash+=col;mine+=col*(p.myShare/100);});
-  ST.contracts.forEach(c=>{const L=ledger(c);L.charges.forEach(x=>{if(x.y===y&&x.due){exp+=x.amount;alloc+=x.paid;}});
-    const a=aging(c);ag.a+=a.a;ag.b+=a.b;ag.c+=a.c;});
-  const rate=exp?Math.round(alloc/exp*100):0;
-  const rows=ST.properties.map(p=>{const Y=yields(p.id,y);const c=activeContractOf(p.id);
-    return `<tr><td><b>${esc(p.name)}</b>${p.myShare<100?`<small>سهم ${toFa(p.myShare)}٪</small>`:''}</td><td>${nf(collectedCash(p.id,y))}</td>
-    <td>${Y?toFa(Y.gross.toFixed(1))+'٪':'—'}</td><td>${Y&&Y.eff!=null?toFa(Y.eff.toFixed(1))+'٪':'—'}</td><td>${Y?toFa(Y.real.toFixed(1))+'٪':'—'}</td></tr>`;}).join('');
-  const deps=depositsHeld();const depSum=deps.reduce((s,c)=>s+c.deposit,0);
-  const pbs=partnerBalances(y);
-  return `<div class="bar"><div class="yr"><button onclick="RY++;render()" aria-label="سال بعد">‹</button><b>${toFa(y)}</b><button onclick="RY--;render()" aria-label="سال قبل">›</button></div></div>
-  <section class="kpis">
-    <div><small>وصولی نقدی سال</small><b>${nf(cash)}</b></div>
-    <div><small>سهم من از وصولی</small><b>${nf(mine)}</b></div>
-    <div><small>نرخ وصول اجارهٔ سررسیدشده</small><b>${toFa(rate)}٪</b></div>
-    <div><small>ودیعه‌های نزد مالک</small><b>${nf(depSum)}</b></div>
-  </section>
-  <h3 class="sec">بازده املاک</h3>
-  <div class="tbl"><table><thead><tr><th>ملک</th><th>وصولی ${toFa(y)}</th><th>ناخالص</th><th>مؤثر</th><th>تحقق‌یافته</th></tr></thead><tbody>${rows||'<tr><td colspan="5">—</td></tr>'}</tbody></table></div>
-  <p class="note">ناخالص = اجارهٔ فعلی × ۱۲ ÷ ارزش. مؤثر = همان ÷ (ارزش − ودیعه). تحقق‌یافته = وصولی نقدی سال ÷ ارزش.</p>
-  <h3 class="sec">سنی‌بندی معوقات (امروز)</h3>
-  <section class="aging"><div><small>تا ۳۰ روز</small><b>${nf(ag.a)}</b></div><div><small>۳۱ تا ۶۰ روز</small><b>${nf(ag.b)}</b></div><div class="${ag.c>0?'is-late':''}"><small>بیش از ۶۰ روز</small><b>${nf(ag.c)}</b></div></section>
-  ${pbs.length?`<h3 class="sec">تسویه با شرکا (${toFa(y)})</h3><div class="list">${pbs.map(r=>`<div class="row col"><div class="rtop"><div class="rb"><b>${esc(r.partner)}</b><small>${r.props.map(esc).join('، ')}</small>
-      <small>طلب من از او: ${nf(r.fromPartner)}، بدهی من به او: ${nf(r.toPartner)}، تسویه‌شده: ${nf(r.settledIn-r.settledOut)}</small></div>
-      <div class="bal ${r.net>0?'is-adv':r.net<0?'is-late':''}">${r.net===0?'تسویه':nf(Math.abs(r.net))}<small>${r.net>0?'او بدهکار است':r.net<0?'من بدهکارم':''}</small></div></div>
-      ${r.net!==0?`<div class="ra"><button class="mini ok" onclick="openSettle('${esc(r.partner)}',${y},${r.net})">ثبت تسویه</button></div>`:''}</div>`).join('')}</div>`:''}
-  ${deps.length?`<h3 class="sec">دفتر ودیعه‌ها</h3><div class="list">${deps.map(c=>{const p=propOf(c.propertyId);return `<div class="row"><div class="rb"><b>${esc(tenName(c))}</b><small>${esc(propName(c))}، دریافت ${fmtD(c.depReceived)}${p&&p.collector==='partner'?`، نزد ${esc(p.partner||'شریک')}`:''}</small></div><div class="bal">${nf(c.deposit)}</div></div>`;}).join('')}</div>`:''}`;
+async function eurToggle(id,on){await commit(()=>setEurDone(id,on,today()),on?'تأیید یورو ثبت شد':'تأیید یورو لغو شد');openDealView(id);}
+async function savePay(id){const date=readDate('p_date');if(!date)return errIn('p_date','تاریخ نامعتبر است');const a=toLn(val('p_amt'));if(!(a>0))return errIn('p_amt','مبلغ را وارد کنید');
+  if(a>remT(byId(ST.deals,id))&&!confirm('مبلغ از باقی‌مانده بیشتر است. ثبت شود؟'))return;
+  await commit(()=>addPay(id,{date,amount:a,ref:val('p_ref')}),'ثبت شد');openDealView(id);}
+async function delPay(id,pid){if(!confirm('این ردیف حذف شود؟'))return;await commit(()=>{const d=byId(ST.deals,id);d.pays=d.pays.filter(p=>p.id!==pid);},'ردیف حذف شد');openDealView(id);}
+async function shareDeal(id){const d=byId(ST.deals,id);const txt=`${kindL(d)}: ${eu(d.eur)}\nنرخ: ${nf(d.rate)} تومان\nمبلغ: ${nf(tom(d))} تومان\nتاریخ: ${fmtD(d.date)}\nپرداخت/دریافت: ${nf(paidT(d))} — مانده ${nf(Math.max(0,remT(d)))}`;
+  try{if(navigator.share)await navigator.share({text:txt});else{await navigator.clipboard.writeText(txt);ntf('متن کپی شد');}}catch(e){}}
+// ---------------- v1.1: payments sent from «سرمایه» ----------------
+// v1.6: a payment with the same amount within ±2 days already in a deal → probably entered by hand
+function bridgeMatch(b,dealId){const n=dayNum(b.date);
+  for(const d of ST.deals){if(dealId&&d.id!==dealId)continue;const p=(d.pays||[]).find(p=>Math.abs(p.amount-b.a)<=1&&Math.abs(dayNum(p.date)-n)<=2);if(p)return{d,p};}return null;}
+function openSfBridge(id){
+  const b=ST.bridge.find(x=>x.id===id);if(!b)return;const kind=b.kind==='pay'?'buy':'sell';
+  const L=ST.deals.filter(d=>d.kind===kind&&remT(d)>0).sort((p,q)=>Math.abs(remT(p)-b.a)-Math.abs(remT(q)-b.a));
+  openSheet(`${sheetHead((b.kind==='pay'?'پرداخت ':'دریافت ')+nf(b.a)+' تومان',esc(b.bank||'')+' · '+fmtD(b.date))}
+  <p class="dim">این ${b.kind==='pay'?'پرداخت':'دریافت'} مربوط به کدام معامله است؟ معاملهٔ هم‌مبلغ بالای فهرست است.</p>
+  ${L.length?`<div class="list">${L.map(d=>`<button class="row tap" onclick="sfAssign('${id}','${d.id}')"><div class="rb"><b>${esc(d.party||'بدون نام')} · ${eu(d.eur)}</b><small>${fmtD(d.date)} · مانده ${nf(remT(d))} تومان${remT(d)===b.a?' · ✓ هم‌مبلغ':''}</small></div></button>`).join('')}</div>`:'<p class="note">معاملهٔ بازی با این نوع نیست. اول معامله را ثبت کنید، بعد دوباره همین‌جا بزنید.</p>'}
+  ${(m=>m?`<p class="note">✓ پرداختی با همین مبلغ (${fmtD(m.p.date)}) در معاملهٔ «${esc(m.d.party||'بدون نام')} · ${eu(m.d.eur)}» ثبت شده است. اگر همان است، فقط این مورد را ببندید تا دوباره ثبت نشود.</p><button class="btn pri" onclick="sfDone('${id}')">ثبت شده است، ببند</button>`:'')(bridgeMatch(b))}
+  <div class="acts"><button class="btn" onclick="closeSheet();openDeal('','${id}')">معاملهٔ جدید (همین پرداخت به آن وصل می‌شود)</button><button class="btn" onclick="sfIgnore('${id}')">نادیده</button></div>`);
 }
-
-// ---------------- Property sheet ----------------
-function openProp(id){
-  const p=id?propOf(id):null;const c=p?activeContractOf(p.id):null;
-  const old=p?contractsOfProp(p.id).filter(x=>x.status!=='active'):[];
-  openSheet(`${sheetHead(p?esc(p.name):'ملک جدید',p?(p.type==='com'?'تجاری':'مسکونی'):'')}
-  ${field('نام ملک','<input id="p_name" value="'+esc(p?p.name:'')+'" placeholder="مثلاً آپارتمان طبقه دوم">')}
-  ${field('نشانی','<input id="p_addr" value="'+esc(p?p.address:'')+'">')}
-  <div class="g2">${field('نوع',`<select id="p_type"><option value="res"${!p||p.type!=='com'?' selected':''}>مسکونی</option><option value="com"${p&&p.type==='com'?' selected':''}>تجاری</option></select>`)}
-  ${field('ارزش روز ملک (تومان)',money('p_val',p?p.value:0),'برای محاسبهٔ بازده')}</div>
-  <div class="g2">${field('سهم من (٪)',`<input id="p_share" inputmode="numeric" value="${toFa(p?p.myShare:100)}" oninput="$('p_partner_box').hidden=toLn(this.value)>=100">`)}
-  ${field('نام شریک',`<input id="p_partner" value="${esc(p?p.partner:'')}">`)}</div>
-  <div id="p_partner_box" ${!p||p.myShare>=100?'hidden':''}>${field('اجاره را چه کسی وصول می‌کند؟',`<select id="p_col"><option value="me"${!p||p.collector!=='partner'?' selected':''}>خودم</option><option value="partner"${p&&p.collector==='partner'?' selected':''}>شریک</option></select>`,'در پایان سال بر این اساس تسویه محاسبه می‌شود')}</div>
-  <button class="btn pri" onclick="saveProp('${p?p.id:''}')">ذخیرهٔ ملک</button>
-  ${p?`<div class="divider"></div><h3 class="sec m0">قرارداد</h3>
-    ${c?`<div class="ctr"><p><b>${esc(tenName(c))}</b> از ${fmtM(c.periods[0].sy*12+c.periods[0].sm)}، تا پایان ${fmtM(lastIdx(c))}</p>
-      <p>اجارهٔ فعلی ${nf(currentRent(c))} تومان، سررسید روز ${toFa(c.periods[c.periods.length-1].sd)} هر ماه${c.deposit?`، ودیعه ${nf(c.deposit)}`:''}</p>
-      ${c.periods.length>1?`<p class="dim">${c.periods.map((q,i)=>`دورهٔ ${toFa(i+1)}: ${nf(q.rent)} تومان`).join('، ')}</p>`:''}</div>
-      <div class="acts"><button class="btn" onclick="openStatement('${c.id}')">صورت‌حساب</button><button class="btn" onclick="openRenew('${c.id}')">تمدید</button>
-      <button class="btn" onclick="openContract('${p.id}','${c.id}')">ویرایش قرارداد</button><button class="btn" onclick="openEnd('${c.id}')">پایان قرارداد</button></div>`
-    :`<p class="calm">این ملک قرارداد فعال ندارد.</p><button class="btn pri" onclick="openContract('${p.id}')">ثبت قرارداد</button>`}
-    ${old.length?`<p class="dim">قراردادهای قبلی: ${old.map(x=>`<a href="#" onclick="openStatement('${x.id}');return false">${esc(tenName(x))}</a>`).join('، ')}</p>`:''}
-    <div class="divider"></div><button class="btn danger" onclick="askDelProp('${p.id}')">حذف ملک</button>`:''}`);
+async function sfAssign(id,dealId){const b=ST.bridge.find(x=>x.id===id);if(!b)return;
+  {const m=bridgeMatch(b,dealId);if(m&&!confirm(`⚠️ در این معامله پرداختی با همین مبلغ (${nf(m.p.amount)} تومان، ${fmtD(m.p.date)}) ثبت شده است.\nدوباره ثبت شود؟\n\n(اگر همان پرداخت است، «لغو» و سپس «ثبت شده است، ببند» را بزنید.)`))return;}
+  const ok=await commit(()=>{addPay(dealId,{date:b.date,amount:b.a,ref:[b.bank,b.acc].filter(Boolean).join(' · '),force:true});ST.bridge=ST.bridge.filter(x=>x.id!==id);ST.bridgeDone[id]=1;},'به معامله وصل شد');
+  if(ok)sfInboxRemove(id).catch(()=>{});}
+async function sfDone(id){const ok=await commit(()=>{ST.bridge=ST.bridge.filter(x=>x.id!==id);ST.bridgeDone[id]=1;},'بسته شد — پرداخت قبلاً در معامله ثبت شده بود');if(ok)sfInboxRemove(id).catch(()=>{});}
+async function sfIgnore(id){const ok=await commit(()=>{ST.bridge=ST.bridge.filter(x=>x.id!==id);ST.bridgeDone[id]=1;},'نادیده گرفته شد');if(ok)sfInboxRemove(id).catch(()=>{});}
+// ---------------- v1.3: today's rate on Home (optional, latest entry always wins) ----------------
+function rateAge(r){if(!r)return'';const dd=dayNum(today())-dayNum(r.date);
+  if(dd<=0){const h=r.at?new Date(r.at):null;return 'امروز'+(h&&dd===0?' ساعت '+toFa(String(h.getHours()).padStart(2,'0')+':'+String(h.getMinutes()).padStart(2,'0')):'');}
+  return dd===1?'دیروز':toFa(dd)+' روز پیش';}
+function rateCard(){
+  const r=lastRate();const stale=!r||dayNum(today())-dayNum(r.date)>=1;
+  return `<section class="ratebox${stale?' stale':''}">
+    <div class="rb-top"><small>نرخ روز یورو (تومان)</small><b>${r?nf(r.rate):'—'}</b><em>${r?'آخرین ثبت: '+rateAge(r):'هنوز ثبت نشده'}</em></div>
+    <div class="rb-in"><input id="hr_v" inputmode="numeric" placeholder="نرخ جدید (اختیاری)" autocomplete="off" oninput="fmtIn(this)" onkeydown="if(event.key==='Enter')saveHomeRate()"><button class="btn pri" onclick="saveHomeRate()">ثبت</button></div>
+    ${stale?`<p class="rb-warn">${r?`نرخ امروز ثبت نشده؛ ارزش و سود/زیان بر اساس نرخ ${rateAge(r)} است.`:'برای محاسبهٔ ارزش و سود/زیان، نرخ روز را وارد کنید.'}</p>`:''}
+  </section>`;
 }
-async function saveProp(id){
-  const name=val('p_name').trim();if(!name)return errIn('p_name','نام ملک را وارد کنید');
-  const share=toLn(val('p_share'));if(!(share>0&&share<=100))return errIn('p_share','سهم باید بین ۱ تا ۱۰۰ باشد');
-  const partner=val('p_partner').trim();if(share<100&&!partner)return errIn('p_partner','برای ملک مشاع، نام شریک را وارد کنید');
-  const rec={name,address:val('p_addr').trim(),type:val('p_type'),value:toLn(val('p_val')),myShare:share,partner:share<100?partner:'',collector:share<100?val('p_col'):'me'};
-  let pid=id;
-  if(id) Object.assign(propOf(id),rec); else {pid=uid();ST.properties.push({id:pid,note:'',...rec});}
-  await sv();ntf('ملک ذخیره شد');render();openProp(pid);
+function rateGuard(v){const r=lastRate();return !(r&&Math.abs(v-r.rate)/r.rate>0.15)||confirm(`نرخ جدید ${nf(v)} با نرخ قبلی ${nf(r.rate)} بیش از ۱۵٪ فرق دارد (شاید یک صفر کم یا زیاد شده). درست است؟`);}
+async function saveHomeRate(){const v=toLn(val('hr_v'));if(!(v>0))return errIn('hr_v','نرخ را وارد کنید');if(!rateGuard(v))return;await commit(()=>addRate(v,today()),'نرخ روز ثبت شد: '+nf(v));}
+// ---------------- Rate / opening / count ----------------
+function openRate(){const r=lastRate();openSheet(`${sheetHead('نرخ روز یورو','نرخ بازار آزاد (مثلاً از اپ «چند»)')}
+  ${field('نرخ هر یورو (تومان)',money('r_v',r?r.rate:0))}${field('تاریخ',dateIn('r_d',today()))}<button class="btn pri" onclick="saveRate()">ثبت</button>
+  ${ST.rates.length?`<h3 class="sec">نرخ‌های اخیر</h3><div class="list">${ST.rates.slice().sort((a,b)=>cmpD(b.date,a.date)||b.at-a.at).slice(0,8).map(x=>`<div class="row"><div class="rb"><b>${nf(x.rate)}</b><small>${fmtD(x.date)}</small></div></div>`).join('')}</div>`:''}`);}
+async function saveRate(){const d=readDate('r_d');if(!d)return errIn('r_d','تاریخ نامعتبر است');const v=toLn(val('r_v'));if(!(v>0))return errIn('r_v','نرخ را وارد کنید');if(!rateGuard(v))return;await commit(()=>addRate(v,d),'نرخ روز ثبت شد');}
+function openOpening(){const o=ST.opening||{eur:0,cost:861929153,date:today()};openSheet(`${sheetHead('موجودی اولیهٔ صندوق','یورویی که الان در صندوق دارید')}
+  ${field('تعداد یورو',`<input id="o_eur" inputmode="decimal" value="${o.eur?toFa(o.eur):''}">`)}
+  ${field('بهای تمام‌شدهٔ کل (تومان)',money('o_cost',o.cost),'پیش‌فرض: ۸۶۱٬۹۲۹٬۱۵۳ — جمع خرید یورو در صورتحساب تجارت')}
+  ${field('تاریخ',dateIn('o_d',o.date))}<button class="btn pri" onclick="saveOpening()">ذخیره</button>`);}
+async function saveOpening(){const eur=parseFloat(normDigits(val('o_eur')).replace(/[٫,]/g,'.'))||0;const d=readDate('o_d');if(!d)return errIn('o_d','تاریخ نامعتبر است');
+  await commit(()=>{ST.opening={eur,cost:toLn(val('o_cost')),date:d};},'موجودی اولیه ثبت شد');}
+function openCount(){const v=vault();openSheet(`${sheetHead('شمارش صندوق','تعداد واقعیِ یوروهای داخل صندوق')}
+  <p class="note">موجودی طبق دفتر: <b>${eu(v.eur)}</b></p>${field('یورو شمارش‌شده',`<input id="c_eur" inputmode="decimal">`)}${field('تاریخ',dateIn('c_d',today()))}
+  <button class="btn pri" onclick="saveCount()">ثبت</button>`);}
+async function saveCount(){const e=parseFloat(normDigits(val('c_eur')).replace(/[٫,]/g,'.'));if(!(e>=0))return errIn('c_eur','عدد را وارد کنید');const d=readDate('c_d');
+  let c;await commit(()=>{c=addCount(e,d);},'شمارش ثبت شد');if(c&&Math.abs(c.eur-c.expected)>0.001)setTimeout(()=>alert(`اختلاف با دفتر: ${eu(c.eur-c.expected)}\nیک معامله یا تأیید جا افتاده، یا شمارش دوباره لازم است.`),300);}
+// ---------------- Vault ----------------
+function vVault(){
+  const v=vault(),o=ST.opening,lc=ST.counts.slice().sort((a,b)=>cmpD(b.date,a.date)||b.at-a.at)[0];
+  return `<section class="hero"><div style="display:flex;justify-content:space-between;align-items:center"><p class="hero-l">صندوق</p>${bridgeReady()?`<button class="info inv" onclick="openBridgeInfo()" aria-label="ارزش در «سرمایه»">ⓘ</button>`:''}</div><p class="hero-n">${eu(v.eur)}</p>
+    <p class="hero-s">بهای تمام‌شده: <b>${nf(v.cost)}</b> تومان · میانگین هر یورو <b>${nf(v.avg)}</b></p></section>
+  <div class="kpis"><div><small>ارزش روز</small><b>${v.mkt?nf(v.value):'—'}</b></div><div><small>سود/زیان ارزش (تحقق‌نیافته)</small><b class="${v.unreal<0?'is-late':''}">${v.unreal==null?'—':(v.unreal<0?'−':'+')+nf(Math.abs(v.unreal))}</b></div>
+   <div><small>سود فروش‌ها (تحقق‌یافته)</small><b>${nf(v.realized)}</b></div><div><small>نرخ روز</small><b>${v.mkt?nf(v.mkt):'—'}</b></div></div>
+  <h3 class="sec">شمارش صندوق <button class="info" onclick="openCountInfo()" aria-label="شمارش صندوق یعنی چه؟">ⓘ</button></h3>${lc?`<div class="row"><span class="ri ${Math.abs(lc.eur-lc.expected)<0.001?'r-ok':'r-late'}">${svg(Math.abs(lc.eur-lc.expected)<0.001?'ok':'late')}</span><div class="rb"><b>${eu(lc.eur)} در ${fmtD(lc.date)}</b><small>${Math.abs(lc.eur-lc.expected)<0.001?'با دفتر برابر بود':'اختلاف با دفتر: '+eu(lc.eur-lc.expected)}</small></div></div>`:'<p class="dim">هنوز شمارشی ثبت نشده.</p>'}
+  <div class="acts"><button class="btn" onclick="openCount()">ثبت شمارش</button><button class="btn" onclick="openRate()">نرخ روز</button></div>
+  <h3 class="sec">موجودی اولیه</h3><div class="row"><div class="rb"><b>${o?eu(o.eur)+' · '+nf(o.cost)+' تومان':'ثبت نشده'}</b><small>${o?fmtD(o.date):''}</small></div><div class="ra"><button class="mini" onclick="openOpening()">ویرایش</button></div></div>`;
 }
-function askDelProp(id){
-  const n=contractsOfProp(id).length;
-  openSheet(`${sheetHead('حذف ملک')}<p>این ملک${n?` همراه ${toFa(n)} قرارداد و همهٔ پرداخت‌ها و چک‌هایش`:''} حذف می‌شود. این کار برگشت‌پذیر نیست.</p>
-  <button class="btn danger" onclick="delProperty('${id}');sv().then(()=>{closeSheet();render();ntf('ملک حذف شد');})">حذف شود</button><button class="btn" onclick="openProp('${id}')">انصراف</button>`);
+function openBridgeInfo(){openSheet(sheetHead('ارزش یورو در «سرمایه»','چرا با «ارزش روز» این اپ فرق دارد')+bridgeCard());}
+function openCountInfo(){openSheet(`${sheetHead('شمارش صندوق یعنی چه؟')}
+  <p class="note" style="line-height:2">هر چند وقت یک بار، یوروهای داخل صندوق <b>واقعاً شمرده</b> می‌شوند و عدد را این‌جا وارد می‌کنید. اپ آن را با <b>موجودی دفتر</b> (معاملات تأییدشده) مقایسه می‌کند.</p>
+  <p class="note" style="line-height:2">✓ اگر برابر بود، دفتر کامل و درست است.<br>⚠️ اگر فرق داشت، یعنی معامله‌ای ثبت نشده، تأیید یورویی جا افتاده، یا شمارش باید تکرار شود.</p>
+  <button class="btn pri" onclick="openCount()">ثبت شمارش</button>`);}
+function bridgeCard(){
+  if(!bridgeReady())return '';const p=bridgeParts();let pub=null;try{pub=JSON.parse(localStorage.getItem('sarafi_pub')||'null');}catch(e){}
+  const line=(l,v,sign)=>v?`<div style="display:flex;justify-content:space-between;padding:4px 0"><span>${l}</span><b>${sign}${nf(v)}</b></div>`:'';
+  return `<div class="note" style="line-height:1.9">
+    ${line(p.baseAtCost?'یوروهای صندوق (به بهای خرید؛ نرخ روز ثبت نشده)':'یوروهای صندوق به نرخ روز',p.base,'')}
+    ${line('تومانِ پرداخت‌شده برای یوروی هنوز نرسیده',p.paidInTransit,'+ ')}
+    ${line('تومانی که هنوز بدهکارم',p.owedByMe,'− ')}
+    ${line('تومانی که هنوز طلبکارم',p.owedToMe,'+ ')}
+    ${line('تومانِ دریافتی برای یوروی هنوز تحویل‌نشده',p.receivedEarly,'− ')}
+    <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>= حساب «ارز (یورو)» در سرمایه</span><b>${nf(p.target)}</b></div>
+    <small class="dim">${!ghOn()?'پشتیبان GitHub فعال نیست؛ چیزی ارسال نمی‌شود.':pub?(pub.target===p.target?'✓ ارسال شد — ':'⏳ در صف ارسال (حدود ۲۰ ثانیه) — آخرین ارسال: ')+new Date(pub.at).toLocaleString('fa-IR'):'هنوز ارسال نشده'}. «سرمایه» این عدد را دفعهٔ بعد که باز شود می‌گیرد.</small></div>`;
 }
-
-// ---------------- Contract sheets ----------------
-function openContract(pid,cid){
-  const c=cid?ctrOf(cid):null;const lp=c?c.periods[c.periods.length-1]:null;const t=c?tenOf(c.tenantId):null;
-  const start=lp?{y:lp.sy,m:lp.sm,d:lp.sd}:today();
-  openSheet(`${sheetHead(c?'ویرایش قرارداد':'قرارداد جدید',esc(propOf(pid).name))}
-  ${c?'':field('مستأجر',`<select id="c_ten" onchange="$('c_newten').hidden=this.value!=='__new'"><option value="__new">مستأجر جدید</option>${ST.tenants.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select>`)}
-  <div id="c_newten" ${c?'hidden':''}><div class="g2">${field('نام مستأجر','<input id="c_tname">')}${field('موبایل','<input id="c_tphone" inputmode="tel" dir="ltr">')}</div></div>
-  ${c?`<p class="dim">مستأجر: ${esc(t?t.name:'')} <a href="#" onclick="openTenant('${c.tenantId}','${c.id}');return false">ویرایش مشخصات</a></p>`:''}
-  ${field('تاریخ شروع قرارداد'+(c&&c.periods.length>1?' (دورهٔ جاری)':''),dateIn('c_start',start),'اولین اجاره یک ماه بعد، در همین روز سررسید می‌شود')}
-  <div class="g2">${field('اجارهٔ ماهانه (تومان)',money('c_rent',lp?lp.rent:0))}${field('مدت (ماه)',`<input id="c_dur" inputmode="numeric" value="${toFa(lp?lp.dur:12)}">`)}</div>
-  ${field('ودیعه (تومان)',money('c_dep',c?c.deposit:0))}
-  <label class="chk"><input type="checkbox" id="c_depok" ${c&&c.depReceived?'checked':''} onchange="$('c_depd').hidden=!this.checked"> ودیعه دریافت شده</label>
-  <div id="c_depd" ${c&&c.depReceived?'':'hidden'}>${field('تاریخ دریافت ودیعه',dateIn('c_depdate',c&&c.depReceived||start))}</div>
-  ${c?`<label class="chk"><input type="checkbox" id="c_depret" ${c.depReturned?'checked':''}> ودیعه بازگردانده شده</label>`:''}
-  <button class="btn pri" onclick="saveContract('${pid}','${c?c.id:''}')">ذخیرهٔ قرارداد</button>
-  ${c?`<button class="btn danger" onclick="askDelContract('${c.id}')">حذف قرارداد</button>`:''}`);
+// ---------------- Report ----------------
+function vReport(){
+  const t=today();const months=[];for(let k=0;k<6;k++){let m=t.m-k,y=t.y;while(m<0){m+=12;y--;}months.push({y,m});}
+  const v=vault();
+  return `<div class="kpis"><div><small>سود فروش‌ها (تحقق‌یافته)</small><b>${nf(v.realized)}</b></div><div><small>سود/زیان ارزش</small><b>${v.unreal==null?'—':(v.unreal<0?'−':'+')+nf(Math.abs(v.unreal))}</b></div></div>
+  <h3 class="sec">شش ماه اخیر</h3><div class="tbl"><table><thead><tr><th>ماه</th><th>یورو گرفتم</th><th>یورو دادم</th></tr></thead><tbody>
+  ${months.map(x=>{const s=monthSummary(x.y,x.m);return `<tr><td>${MFA[x.m]} ${toFa(x.y)}</td><td>${s.buyE?eu(s.buyE)+'<small>'+nf(s.buyT)+'</small>':'—'}</td><td>${s.sellE?eu(s.sellE)+'<small>'+nf(s.sellT)+'</small>':'—'}</td></tr>`;}).join('')}
+  </tbody></table></div><p class="dim">تغییر ارزش یورو تا فروش «تحقق‌نیافته» است و جزو سود حساب نمی‌شود.</p>`;
 }
-async function saveContract(pid,cid){
-  const s=readDate('c_start');if(!s)return errIn('c_start','تاریخ شروع نامعتبر است');
-  const rent=toLn(val('c_rent'));if(!(rent>0))return errIn('c_rent','اجارهٔ ماهانه را وارد کنید');
-  const dur=parseInt(normDigits(val('c_dur')));if(!(dur>=1&&dur<=60))return errIn('c_dur','مدت باید بین ۱ تا ۶۰ ماه باشد');
-  const dep=toLn(val('c_dep'));let depReceived=null;
-  if($('c_depok').checked){depReceived=readDate('c_depdate');if(!depReceived)return errIn('c_depdate','تاریخ دریافت ودیعه نامعتبر است');}
-  const per={sd:s.d,sm:s.m,sy:s.y,dur,rent};
-  if(cid){
-    const c=ctrOf(cid);
-    if(c.periods.length>1&&pFirst(per)<=pLast(c.periods[c.periods.length-2]))return errIn('c_start','دورهٔ جاری با دورهٔ قبلی هم‌پوشانی دارد');
-    c.periods[c.periods.length-1]=per;c.deposit=dep;c.depReceived=depReceived;
-    c.depReturned=$('c_depret')&&$('c_depret').checked?(c.depReturned||today()):null;
-  }else{
-    if(activeContractOf(pid))return ntf('این ملک قرارداد فعال دارد؛ ابتدا آن را پایان دهید');
-    let tid=val('c_ten');
-    if(tid==='__new'){const n=val('c_tname').trim();if(!n)return errIn('c_tname','نام مستأجر را وارد کنید');
-      tid=uid();ST.tenants.push({id:tid,name:n,phone:normDigits(val('c_tphone')).trim(),note:''});}
-    ST.contracts.push({id:uid(),propertyId:pid,tenantId:tid,periods:[per],deposit:dep,depReceived,depReturned:null,status:'active',endIdx:null,note:''});
-  }
-  await sv();ntf('قرارداد ذخیره شد');render();openProp(pid);
-}
-function askDelContract(cid){
-  const c=ctrOf(cid);const n=paymentsOf(cid).length;
-  openSheet(`${sheetHead('حذف قرارداد')}<p>قرارداد ${esc(tenName(c))}${n?` با ${toFa(n)} پرداخت ثبت‌شده`:''} حذف می‌شود. اگر قرارداد تمام شده، به‌جای حذف از «پایان قرارداد» استفاده کنید تا سابقه بماند.</p>
-  <button class="btn danger" onclick="delContract('${cid}');sv().then(()=>{closeSheet();render();ntf('قرارداد حذف شد');})">حذف شود</button><button class="btn" onclick="openProp('${c.propertyId}')">انصراف</button>`);
-}
-function openRenew(cid){
-  const c=ctrOf(cid),lp=c.periods[c.periods.length-1];const next=lp.sy*12+lp.sm+lp.dur;
-  openSheet(`${sheetHead('تمدید قرارداد',esc(tenName(c))+'، '+esc(propName(c)))}
-  <p class="dim">دورهٔ فعلی تا ${fmtM(lastIdx(c))} با اجارهٔ ${nf(lp.rent)} تومان. نرخ دوره‌های قبل در سوابق حفظ می‌شود.</p>
-  ${field('شروع دورهٔ جدید',dateIn('r_start',{y:Math.floor(next/12),m:next%12,d:lp.sd}),'به‌طور معمول سالگرد قرارداد')}
-  <div class="g2">${field('اجارهٔ جدید (تومان)',money('r_rent',lp.rent))}${field('مدت (ماه)',`<input id="r_dur" inputmode="numeric" value="${toFa(12)}">`)}</div>
-  ${field('ودیعهٔ جدید (تومان)',money('r_dep',c.deposit),'اگر تغییری ندارد، دست نزنید')}
-  <button class="btn pri" onclick="saveRenew('${cid}')">ثبت تمدید</button>`);
-}
-async function saveRenew(cid){
-  const c=ctrOf(cid);const s=readDate('r_start');if(!s)return errIn('r_start','تاریخ نامعتبر است');
-  const rent=toLn(val('r_rent'));if(!(rent>0))return errIn('r_rent','اجاره را وارد کنید');
-  const dur=parseInt(normDigits(val('r_dur')));if(!(dur>=1&&dur<=60))return errIn('r_dur','مدت باید بین ۱ تا ۶۰ ماه باشد');
-  const per={sd:s.d,sm:s.m,sy:s.y,dur,rent};
-  if(pFirst(per)<=lastIdx(c))return errIn('r_start','شروع دورهٔ جدید با دورهٔ فعلی هم‌پوشانی دارد');
-  c.periods.push(per);c.deposit=toLn(val('r_dep'));c.status='active';c.endIdx=null;
-  await sv();closeSheet();ntf('قرارداد تمدید شد');render();
-}
-function openEnd(cid){
-  const c=ctrOf(cid);const li=Math.min(lastIdx(c),tIdx());
-  openSheet(`${sheetHead('پایان قرارداد',esc(tenName(c)))}
-  <p class="dim">آخرین ماهی که اجاره به آن تعلق می‌گیرد را انتخاب کنید. ماه‌های بعد از آن از مطالبات حذف می‌شوند.</p>
-  <div class="g2">${field('ماه',`<select id="e_m">${MFA.map((n,i)=>`<option value="${i}"${i===li%12?' selected':''}>${n}</option>`).join('')}</select>`)}${field('سال',`<input id="e_y" inputmode="numeric" value="${toFa(Math.floor(li/12))}">`)}</div>
-  <label class="chk"><input type="checkbox" id="e_dep" ${c.depReturned?'checked':''}> ودیعه بازگردانده شد</label>
-  <button class="btn pri" onclick="saveEnd('${cid}')">ثبت پایان قرارداد</button>`);
-}
-async function saveEnd(cid){
-  const c=ctrOf(cid);const y=parseInt(normDigits(val('e_y'))),m=parseInt(val('e_m'));
-  if(!(y>1300))return errIn('e_y','سال نامعتبر است');
-  const idx=y*12+m;const first=Math.min(...c.periods.map(pFirst));
-  if(idx<first-1)return errIn('e_y','ماه پایان قبل از شروع قرارداد است');
-  c.endIdx=idx;c.status='ended';if($('e_dep').checked&&!c.depReturned)c.depReturned=today();
-  await sv();closeSheet();ntf('قرارداد پایان یافت');render();
-}
-function openTenant(tid,cid){
-  const t=tenOf(tid);
-  openSheet(`${sheetHead('مشخصات مستأجر')}${field('نام','<input id="t_name" value="'+esc(t.name)+'">')}${field('موبایل','<input id="t_phone" inputmode="tel" dir="ltr" value="'+esc(t.phone)+'">')}
-  ${field('یادداشت','<textarea id="t_note" rows="2">'+esc(t.note||'')+'</textarea>')}<button class="btn pri" onclick="saveTenant('${tid}','${cid||''}')">ذخیره</button>`);
-}
-async function saveTenant(tid,cid){
-  const t=tenOf(tid);const n=val('t_name').trim();if(!n)return errIn('t_name','نام را وارد کنید');
-  t.name=n;t.phone=normDigits(val('t_phone')).trim();t.note=val('t_note');await sv();ntf('مشخصات ذخیره شد');render();
-  if(cid)openStatement(cid);else closeSheet();
-}
-
-// ---------------- Statement & payments ----------------
-function openStatement(cid,y){
-  const c=ctrOf(cid);if(!c)return;const t=tenOf(c.tenantId);const L=ledger(c);
-  const years=[...new Set(L.charges.map(x=>x.y))];y=y||(years.includes(today().y)?today().y:years[years.length-1]);
-  const rows=L.charges.filter(x=>x.y===y);
-  const pays=paymentsOf(cid).slice().reverse();
-  const stL={paid:'پرداخت‌شده',partial:'ناقص',late:'معوق',upcoming:'آینده',prepaid:'پیش‌پرداخت جزئی'};
-  openSheet(`${sheetHead(esc(t?t.name:''),esc(propName(c)))}
-  <div class="stbal ${L.balance>0?'is-late':L.balance<0?'is-adv':''}"><small>${L.balance>0?'بدهکار':L.balance<0?'بستانکار (پیش‌پرداخت)':'حساب تسویه است'}</small><b>${nf(Math.abs(L.balance))}</b></div>
-  <div class="acts">${c.status==='active'?`<button class="btn pri" onclick="openPay('${cid}')">ثبت پرداخت</button><button class="btn" onclick="sendSms('${cid}')">پیامک</button>`:''}
-    <button class="btn" onclick="shareStatement('${cid}',${y})">تصویر صورت‌حساب</button>${t&&t.phone?`<a class="btn" href="tel:${esc(t.phone)}">تماس</a>`:''}
-    <button class="btn" onclick="openTenant('${c.tenantId}','${cid}')">مشخصات</button></div>
-  ${years.length>1?`<div class="seg yrs">${years.map(v=>`<button class="${v===y?'on':''}" onclick="openStatement('${cid}',${v})">${toFa(v)}</button>`).join('')}</div>`:''}
-  <div class="tbl"><table><thead><tr><th>اجارهٔ ماه</th><th>مبلغ</th><th>پرداخت‌شده</th><th>وضعیت</th></tr></thead><tbody>
-  ${rows.map(x=>`<tr><td>${MFA[covM(x.idx)]}<small>سررسید ${toFa(x.d)} ${MFA[x.m]}</small></td><td>${nf(x.amount)}</td><td>${nf(x.paid)}</td><td><span class="chip st-${x.status}">${stL[x.status]}</span></td></tr>`).join('')||'<tr><td colspan="4">—</td></tr>'}
-  </tbody></table></div>
-  <h3 class="sec">پرداخت‌ها</h3>
-  ${pays.length?`<div class="list">${pays.map(p=>`<div class="row"><div class="rb"><b>${nf(p.amount)} تومان</b><small>${fmtD(p.date)}، ${METHOD[p.method||'']}${(L.cover[p.id]||[]).length?`، بابت اجارهٔ ${[...new Set(L.cover[p.id])].map(i=>MFA[covM(i)]).join('، ')}`:''}${p.note?`، ${esc(p.note)}`:''}</small></div>
-    <div class="ra"><button class="mini" onclick="openRetarget('${p.id}','${cid}')">ماه</button><button class="mini" onclick="shareReceipt('${p.id}')">رسید</button><button class="mini bad" onclick="askDelPay('${p.id}','${cid}')">حذف</button></div></div>`).join('')}</div>`:'<p class="calm">پرداختی ثبت نشده است.</p>'}`);
-}
-function openPay(cid){
-  const c=ctrOf(cid);const L=ledger(c);
-  const next=L.charges.find(x=>x.paid<x.amount);
-  const suggest=L.balance>0?L.balance:(next?next.amount-next.paid:currentRent(c));
-  openSheet(`${sheetHead('ثبت پرداخت',esc(tenName(c))+'، '+esc(propName(c)))}
-  ${field('مبلغ (تومان)',money('y_amt',suggest),L.balance>0?`معوق فعلی ${nf(L.balance)} تومان`:next?`اجارهٔ بعدی: ${MFA[next.m]}`:'')}
-  ${field('تاریخ دریافت',dateIn('y_date',today()))}
-  ${field('بابت اجارهٔ کدام ماه؟',`<select id="y_t"><option value="">خودکار — ${(()=>{const s=payTarget(L.charges,{date:today()})||L.charges.find(x=>x.paid<x.amount);return s?'اجارهٔ '+MFA[covM(s.idx)]:'نزدیک‌ترین سررسید';})()}</option>${L.charges.filter(x=>x.paid<x.amount).slice(0,8).map(x=>`<option value="${x.idx}">اجارهٔ ${MFA[covM(x.idx)]} ${toFa(Math.floor((x.idx-1)/12))} — مانده ${nf(x.amount-x.paid)}</option>`).join('')}</select>`,'مبلغ اضافه، اول به قدیمی‌ترین ماهِ پرداخت‌نشده می‌رود')}
-  ${field('روش',`<select id="y_m"><option value="transfer">کارت/واریز</option><option value="cash">نقد</option></select>`,'برای چک، از صفحهٔ چک‌ها ثبت کنید؛ با وصول، خودکار پرداخت می‌شود')}
-  ${field('یادداشت','<input id="y_note">')}
-  <button class="btn pri" onclick="savePay('${cid}')">ثبت پرداخت</button>`);
-}
-async function savePay(cid){
-  const amount=toLn(val('y_amt'));if(!(amount>0))return errIn('y_amt','مبلغ را وارد کنید');
-  const date=readDate('y_date');if(!date)return errIn('y_date','تاریخ نامعتبر است');
-  try{addPayment({contractId:cid,amount,date,method:val('y_m'),note:val('y_note').trim(),target:val('y_t')});await sv();ntf('پرداخت ثبت شد؛ رسید را از فهرست پرداخت‌ها بفرستید');render();openStatement(cid,date.y);}
-  catch(e){ntf(e.message);}
-}
-function askDelPay(pid,cid){
-  const p=byId(ST.payments,pid);
-  openSheet(`${sheetHead('حذف پرداخت')}<p>پرداخت ${nf(p.amount)} تومانی ${fmtD(p.date)} حذف شود؟${p.chequeId?' چک مرتبط به حالت «در جریان» برمی‌گردد.':''}</p>
-  <button class="btn danger" onclick="delPayment('${pid}');sv().then(()=>{render();openStatement('${cid}');ntf('پرداخت حذف شد');})">حذف شود</button><button class="btn" onclick="openStatement('${cid}')">انصراف</button>`);
-}
-function sendSms(cid){
-  const c=ctrOf(cid),t=tenOf(c.tenantId);const txt=smsText(cid);
-  if(!txt)return ntf('این قرارداد بدهی یا اجارهٔ پیش رو ندارد');
-  if(!t||!t.phone){ntf('شمارهٔ موبایل مستأجر ثبت نشده است');return openTenant(c.tenantId,cid);}
-  location.href=`sms:${t.phone}?&body=${encodeURIComponent(txt)}`;
-}
-
-// ---------------- Cheque sheet ----------------
-function openCheque(id){
-  const q=id?byId(ST.cheques,id):null;
-  const cs=ST.contracts.filter(c=>c.status==='active'||(q&&c.id===q.contractId));
-  if(!cs.length)return ntf('ابتدا یک قرارداد ثبت کنید');
-  openSheet(`${sheetHead(q?'ویرایش چک':'چک جدید')}
-  ${field('قرارداد',`<select id="q_c">${cs.map(c=>`<option value="${c.id}"${q&&q.contractId===c.id?' selected':''}>${esc(tenName(c))}، ${esc(propName(c))}</option>`).join('')}</select>`)}
-  ${field('نوع',`<select id="q_k" ${q&&q.paymentId?'disabled':''}><option value="rent"${!q||q.kind==='rent'?' selected':''}>چک اجاره</option><option value="guarantee"${q&&q.kind==='guarantee'?' selected':''}>چک ضمانت</option></select>`)}
-  <div class="g2">${field('مبلغ (تومان)',money('q_a',q?q.amount:0))}${field('شمارهٔ چک',`<input id="q_n" inputmode="numeric" dir="ltr" value="${esc(q?q.number:'')}">`)}</div>
-  ${field('بانک',`<input id="q_b" value="${esc(q?q.bank:'')}">`)}
-  ${field('تاریخ سررسید',dateIn('q_d',q?q.due:today()))}
-  <button class="btn pri" onclick="saveCheque('${q?q.id:''}')">ذخیرهٔ چک</button>
-  ${q?`<button class="btn danger" onclick="delCheque('${q.id}');sv().then(()=>{closeSheet();render();ntf('چک حذف شد');})">حذف چک${q.paymentId?' و پرداخت مرتبط':''}</button>`:''}`);
-}
-async function saveCheque(id){
-  const amount=toLn(val('q_a'));if(!(amount>0))return errIn('q_a','مبلغ را وارد کنید');
-  const due=readDate('q_d');if(!due)return errIn('q_d','تاریخ سررسید نامعتبر است');
-  const rec={contractId:val('q_c'),amount,number:normDigits(val('q_n')).trim(),bank:val('q_b').trim(),due};
-  if(id){const q=byId(ST.cheques,id);Object.assign(q,rec);if(!q.paymentId)q.kind=val('q_k');
-    if(q.paymentId){const p=byId(ST.payments,q.paymentId);if(p){p.amount=amount;p.contractId=rec.contractId;}}}
-  else{const kind=val('q_k');ST.cheques.push({id:uid(),kind,...rec,status:kind==='rent'?'pending':'held',statusDate:null,paymentId:null,note:''});}
-  await sv();closeSheet();ntf('چک ذخیره شد');render();
-}
-
-// ---------------- Partner settlement ----------------
-function openSettle(partner,y,net){
-  openSheet(`${sheetHead('ثبت تسویه با '+esc(partner),'سال '+toFa(y))}
-  <p class="dim">${net>0?`${esc(partner)} ${nf(net)} تومان به شما بدهکار است.`:`شما ${nf(-net)} تومان به ${esc(partner)} بدهکارید.`}</p>
-  ${field('جهت',`<select id="s_dir"><option value="in"${net>0?' selected':''}>دریافت از شریک</option><option value="out"${net<0?' selected':''}>پرداخت به شریک</option></select>`)}
-  ${field('مبلغ (تومان)',money('s_a',Math.abs(net)))}${field('تاریخ',dateIn('s_d',today()))}
-  <button class="btn pri" onclick="saveSettle('${esc(partner)}',${y})">ثبت تسویه</button>`);
-}
-async function saveSettle(partner,y){
-  const amount=toLn(val('s_a'));if(!(amount>0))return errIn('s_a','مبلغ را وارد کنید');
-  const date=readDate('s_d');if(!date)return errIn('s_d','تاریخ نامعتبر است');
-  ST.settlements.push({id:uid(),partner,year:y,amount,dir:val('s_dir'),date,note:''});
-  await sv();closeSheet();ntf('تسویه ثبت شد');render();
-}
-
-// ---------------- Images: receipt & statement (canvas → share) ----------------
-async function canvasShare(cv,name,title){
-  const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
-  const file=new File([blob],name,{type:'image/png'});
-  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title});return;}catch(e){if(e.name==='AbortError')return;}}
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-}
-function paperCanvas(h){
-  const cv=document.createElement('canvas');cv.width=720;cv.height=h;const x=cv.getContext&&cv.getContext('2d');
-  if(!x) throw new Error('این مرورگر ساخت تصویر را پشتیبانی نمی‌کند');
-  x.fillStyle='#FBFAF6';x.fillRect(0,0,720,h);x.fillStyle='#15243F';x.fillRect(0,0,720,120);
-  x.fillStyle='#C9A24E';x.fillRect(0,120,720,4);x.direction='rtl';x.textAlign='right';
-  x.fillStyle='#F0C75E';x.font="44px Lalezar, Vazirmatn";x.fillText('املاک',672,72);
-  x.fillStyle='rgba(255,255,255,.75)';x.font="500 18px Vazirmatn";x.fillText('دفتر اجاره و مطالبات',672,102);
-  return{cv,x};
-}
-function kv(x,y,k,v,big){x.textAlign='right';x.fillStyle='#6B7589';x.font="500 20px Vazirmatn";x.fillText(k,672,y);
-  x.textAlign='left';x.fillStyle='#16202E';x.font=(big?'800 34px':'700 22px')+' Vazirmatn';x.fillText(v,48,y);x.textAlign='right';}
-async function shareReceipt(pid){try{await _shareReceipt(pid);}catch(e){ntf(e.message);}}
-async function _shareReceipt(pid){
-  const p=byId(ST.payments,pid);if(!p)return;const c=ctrOf(p.contractId);const L=ledger(c);
-  try{await document.fonts.load('700 22px Vazirmatn');await document.fonts.load('44px Lalezar');}catch(e){}
-  const {cv,x}=paperCanvas(640);
-  x.fillStyle='#16202E';x.font="800 30px Vazirmatn";x.fillText('رسید دریافت اجاره',672,184);
-  let y=250;kv(x,y,'مستأجر',tenName(c));y+=56;kv(x,y,'ملک',propName(c));y+=56;kv(x,y,'تاریخ',fmtD(p.date));y+=56;
-  kv(x,y,'روش',METHOD[p.method||'']);y+=56;const cov=[...new Set(L.cover[p.id]||[])].map(i=>MFA[i%12]+' '+toFa(Math.floor(i/12)));
-  kv(x,y,'بابت',cov.join('، ')||'پیش‌پرداخت');y+=70;x.strokeStyle='#E3E6EC';x.beginPath();x.moveTo(48,y-40);x.lineTo(672,y-40);x.stroke();
-  kv(x,y,'مبلغ دریافتی',nf(p.amount)+' تومان',true);y+=60;kv(x,y,'ماندهٔ حساب پس از این پرداخت',L.balance>0?nf(L.balance)+' بدهکار':L.balance<0?nf(-L.balance)+' بستانکار':'تسویه');
-  await canvasShare(cv,'receipt.png','رسید اجاره');
-}
-async function shareStatement(cid,y){try{await _shareStatement(cid,y);}catch(e){ntf(e.message);}}
-async function _shareStatement(cid,y){
-  const c=ctrOf(cid);const L=ledger(c);const rows=L.charges.filter(x=>x.y===y);
-  try{await document.fonts.load('700 22px Vazirmatn');await document.fonts.load('44px Lalezar');}catch(e){}
-  const {cv,x}=paperCanvas(330+rows.length*46);
-  x.fillStyle='#16202E';x.font="800 28px Vazirmatn";x.fillText(`صورت‌حساب ${tenName(c)}، سال ${toFa(y)}`,672,180);
-  x.fillStyle='#6B7589';x.font="500 19px Vazirmatn";x.fillText(propName(c),672,214);
-  let yy=268;x.font="700 19px Vazirmatn";x.fillStyle='#15243F';[['ماه',672],['اجاره',470],['پرداخت‌شده',290],['مانده',110]].forEach(([t,px])=>x.fillText(t,px,yy));
-  x.font="500 20px Vazirmatn";rows.forEach(r=>{yy+=46;x.fillStyle=r.status==='late'?'#B5412E':'#16202E';
-    [[MFA[r.m],672],[nf(r.amount),470],[nf(r.paid),290],[nf(r.amount-r.paid),110]].forEach(([t,px])=>x.fillText(t,px,yy));});
-  yy+=62;x.fillStyle='#15243F';x.font="800 24px Vazirmatn";x.fillText(`ماندهٔ کل حساب: ${L.balance>0?nf(L.balance)+' بدهکار':L.balance<0?nf(-L.balance)+' بستانکار':'تسویه'}`,672,yy);
-  await canvasShare(cv,'statement.png','صورت‌حساب اجاره');
-}
-
-// ---------------- Settings, backup, import, calendar ----------------
-function openSettings(){
-  const s=ST.settings;
-  openSheet(`${sheetHead('تنظیمات','نسخهٔ '+toFa(APP_VERSION))}
-  <div class="g2">${field('حالت نمایش',`<select id="st_th"><option value="auto"${s.theme==='auto'?' selected':''}>خودکار</option><option value="light"${s.theme==='light'?' selected':''}>روشن</option><option value="dark"${s.theme==='dark'?' selected':''}>تیره</option></select>`)}
-  ${field('یادآوری چند روز بعد از سررسید',`<input id="st_rd" inputmode="numeric" value="${toFa(s.remindDays??2)}">`,'اگر تا این مدت پرداخت نشده باشد')}</div>
-  ${field('متن پیامک یادآوری',`<textarea id="st_sms" rows="4">${esc(s.smsTpl)}</textarea>`,'جایگزین‌ها: {نام} {ملک} {مبلغ} {ماه} {سررسید} {وضعیت}')}
-  <button class="btn pri" onclick="saveSettings()">ذخیرهٔ تنظیمات</button>
+// ---------------- Settings ----------------
+function openSettings(){const s=ST.settings;openSheet(`${sheetHead('تنظیمات','صرافی '+APP_VERSION)}
+  ${field('حالت نمایش',`<select id="st_th"><option value="auto"${s.theme==='auto'?' selected':''}>خودکار</option><option value="light"${s.theme==='light'?' selected':''}>روشن</option><option value="dark"${s.theme==='dark'?' selected':''}>تیره</option></select>`)}
+  <button class="btn pri" onclick="saveSettings()">ذخیره</button>
   <div class="divider"></div><h3 class="sec m0">پشتیبان GitHub (بدون VPN)</h3><p class="dim" id="gh-status">${ghStatusText()}</p><button class="btn" onclick="openGhSheet()">تنظیم پشتیبان GitHub</button>
-  <div class="divider"></div><h3 class="sec m0">پشتیبان ابری Firebase (نیاز به VPN)</h3><div id="cloudbox">${cloudSection()}</div>
-  <div class="divider"></div><h3 class="sec m0">یادآور در تقویم گوشی</h3>
-  <p class="dim">سررسید اجاره‌ها و چک‌های ۱۲ ماه آینده با هشدار به تقویم گوشی اضافه می‌شود؛ حتی وقتی برنامه بسته است یادآوری می‌کند. بعد از هر تغییر مهم، دوباره اضافه کنید.</p>
-  <button class="btn" onclick="exportICS()">افزودن سررسیدها به تقویم</button>
-  <div class="divider"></div><h3 class="sec m0">داده‌ها</h3>
-  <button class="btn" onclick="doBackup()">تهیهٔ فایل پشتیبان (روی گوشی)</button>
-  <label class="btn file">بازیابی از فایل پشتیبان<input type="file" accept=".json,application/json" onchange="restoreFile(this)"></label>
-  <label class="btn file">ورود داده‌های اجاره از «سرمایه»<input type="file" accept=".json,application/json" onchange="importFile(this)"></label>`);
-}
-async function saveSettings(){
-  const rd=parseInt(normDigits(val('st_rd')));if(!(rd>=0&&rd<=15))return errIn('st_rd','عددی بین ۰ تا ۱۵ وارد کنید');
-  Object.assign(ST.settings,{theme:val('st_th'),remindDays:rd,smsTpl:val('st_sms').trim()||DEFAULT_SMS});
-  applyTheme();await sv();closeSheet();ntf('تنظیمات ذخیره شد');render();
-}
-async function downloadOrShare(text,name,mime,title){
-  const file=new File([text],name,{type:mime});
+  <div class="divider"></div><h3 class="sec m0">اتصال به «سرمایه»</h3><p class="dim">${!ghOn()?'نیاز به پشتیبان GitHub دارد':bridgeReady()?'فعال — ارزش خالص یورو برای حساب «ارز (یورو)» سرمایه ارسال می‌شود':'منتظر ثبت موجودی اولیه یا اولین معاملهٔ تأییدشده؛ تا آن موقع چیزی ارسال نمی‌شود'}</p>
+  <div class="divider"></div><h3 class="sec m0">فایل پشتیبان</h3><div class="acts"><button class="btn" onclick="doBackup()">تهیهٔ فایل پشتیبان</button>
+  <label class="btn" style="position:relative">بازیابی از فایل<input type="file" accept=".json,application/json" onchange="restoreFile(this)" style="position:absolute;inset:0;opacity:0"></label></div>`);}
+async function saveSettings(){ST.settings.theme=val('st_th');applyTheme();await sv();closeSheet();ntf('ذخیره شد');}
+async function downloadOrShare(text,name,mime,title){const file=new File([text],name,{type:mime});
   if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title});return true;}catch(e){if(e.name==='AbortError')return false;}}
-  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);return true;
-}
-async function exportICS(){
-  const r=buildICS();if(!r.count)return ntf('سررسید پیش رویی برای افزودن وجود ندارد');
-  await downloadOrShare(r.text,'amlak-sarresid.ics','text/calendar','سررسیدهای اجاره');ntf(`${toFa(r.count)} سررسید آماده شد؛ فایل را با تقویم باز کنید`);
-}
-async function doBackup(){
-  const t=today();const name=`amlak-backup-${t.y}-${t.m+1}-${t.d}.json`;
-  const ok=await downloadOrShare(JSON.stringify({type:'amlak-backup',version:1,exportedAt:Date.now(),state:ST}),name,'application/json','پشتیبان املاک');
-  if(ok){ST.settings.lastBackup=Date.now();await sv();render();ntf('فایل پشتیبان آماده شد');}
-}
-function readJSONFile(input){return new Promise((res,rej)=>{const f=input.files[0];if(!f)return rej(new Error('فایلی انتخاب نشد'));const r=new FileReader();
-  r.onload=()=>{try{res(JSON.parse(r.result));}catch(e){rej(new Error('فایل JSON معتبر نیست'));}};r.onerror=()=>rej(new Error('خواندن فایل ناموفق بود'));r.readAsText(f);});}
-async function restoreFile(input){
-  try{const d=await readJSONFile(input);if(d.type!=='amlak-backup'||!d.state)throw new Error('این فایل پشتیبان «املاک» نیست');
-    if(!confirm('همهٔ داده‌های فعلی با فایل پشتیبان جایگزین شود؟'))return;
-    await dbSet('state_before_restore',JSON.parse(JSON.stringify(ST)));
-    ST=normalize(d.state);applyTheme();await sv();closeSheet();render();ntf('بازیابی انجام شد');
-  }catch(e){ntf(e.message);}finally{input.value='';}
-}
-async function importFile(input){
-  try{const d=await readJSONFile(input);const r=importSarmaye(d);const s=r.rec.src,t=r.rec.dst;
-    const row=(k,a,b)=>`<tr><td>${k}</td><td>${nf(a)}</td><td>${nf(b)}</td><td>${a===b?'<span class="chip ok">برابر</span>':'<span class="chip bad">مغایر</span>'}</td></tr>`;
-    window._pendingImport=r.state;
-    openSheet(`${sheetHead('گزارش تطبیق ورود داده','مقایسهٔ فایل «سرمایه» با داده‌های ساخته‌شده')}
-    <div class="tbl"><table><thead><tr><th>مورد</th><th>سرمایه</th><th>املاک</th><th></th></tr></thead><tbody>
-    ${row('املاک',s.props,t.props)}${row('مستأجران',s.tenants,t.tenants)}${row('قراردادها',s.contracts,t.contracts)}${row('تعداد پرداخت‌ها',s.payments,t.payments)}${row('جمع پرداخت‌ها',s.paySum,t.paySum)}${row('جمع ودیعه‌ها',s.depSum,t.depSum)}</tbody></table></div>
-    ${r.rec.ok?'<p class="calm">همهٔ ارقام برابرند. پس از ورود، سهم مالکیت و وصول‌کنندهٔ ملک‌های مشاع را در صفحهٔ هر ملک تنظیم کنید.</p>'
-      :`<p class="owe">مغایرت وجود دارد${r.rec.skipped?` (${toFa(r.rec.skipped)} پرداخت بدون قرارداد معتبر یا مبلغ صفر کنار گذاشته شد)`:''}. پیشنهاد می‌شود ماژول اجارهٔ «سرمایه» را تا رفع مغایرت حذف نکنید.</p>`}
-    ${ST.properties.length?'<p class="dim">داده‌های فعلی «املاک» جایگزین می‌شود؛ یک نسخهٔ پیش از ورود ذخیره می‌گردد.</p>':''}
-    <button class="btn pri" onclick="applyImport()">ورود داده‌ها</button><button class="btn" onclick="closeSheet()">انصراف</button>`);
-  }catch(e){ntf(e.message);}finally{input.value='';}
-}
-async function applyImport(){
-  if(!window._pendingImport)return;
-  await dbSet('state_before_import',JSON.parse(JSON.stringify(ST)));
-  ST=normalize(window._pendingImport);window._pendingImport=null;await sv();closeSheet();go('props');ntf('داده‌ها وارد شد');
-}
-
-// ---------------- Boot ----------------
+  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);return true;}
+async function doBackup(){const t=today();if(await downloadOrShare(JSON.stringify({type:'sarafi-backup',version:1,exportedAt:Date.now(),state:ST}),`sarafi-backup-${t.y}-${t.m+1}-${t.d}.json`,'application/json','پشتیبان صرافی')){ST.settings.lastBackup=Date.now();await sv();ntf('فایل پشتیبان آماده شد');}}
+async function restoreFile(input){try{const f=input.files[0];if(!f)return;const d=JSON.parse(await f.text());if(d.type!=='sarafi-backup'||!d.state)throw new Error('این فایل پشتیبان «صرافی» نیست');
+  if(!confirm('همهٔ داده‌های فعلی با فایل پشتیبان جایگزین شود؟'))return;await dbSet('state_before_restore',JSON.parse(JSON.stringify(ST)));ST=normalize(d.state);applyTheme();await sv();closeSheet();render();ntf('بازیابی انجام شد');}
+  catch(e){ntf(e.message||'فایل نامعتبر است');}finally{input.value='';}}
 async function boot(){
   await loadState();applyTheme();
-  if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(ST.settings.theme==='auto')applyTheme();});
-  const t=today();$('hdate').textContent=`${t.wd||''} ${fmtD(t)}`;
-  render();
-  setTimeout(()=>{initFirebase().then(refreshCloudUI);},1500);
+  if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(ST.settings.theme==='auto')applyTheme();});
+  const t=today();$('hdate').textContent=`${t.wd||''} ${fmtD(t)}`;render();
   setTimeout(()=>{if(ghOn()&&(Date.now()-(+localStorage.getItem(GH_LAST)||0))>6*3600e3)ghBackup(true);},6000);
-  setTimeout(()=>{if(ghOn()){fetchBridge();ghDepPublish();}},3000);
-  if('serviceWorker' in navigator&&location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  setTimeout(()=>{if(ghOn()){fetchSfInbox();publishStatus().catch(()=>{});}},3000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ghOn())fetchSfInbox();});
+  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
-
-// ---------------- Bridge sheet ----------------
-function openBridge(id){
-  const b=(ST.bridge||[]).find(x=>x.id===id);if(!b)return;
-  const C=bridgeCandidates(b.a);
-  if(!C.length)return ntf('قرارداد فعالی وجود ندارد');
-  const dep=b.kind==='deposit';
-  openSheet(`${sheetHead((dep?(b.dir==='out'?'بازگرداندن پول پیش ':'دریافت پول پیش '):'ثبت واریز ')+nf(b.a)+' تومان',esc(b.bank||'')+'، '+fmtD(b.date))}
-  <p class="dim">${dep?'این پول پیش مربوط به کدام قرارداد است؟':'این مبلغ پرداخت کدام مستأجر است؟ موارد هم‌مبلغ در بالای فهرست آمده‌اند.'}</p>
-  <div class="list">${C.map(x=>`<button class="row tap" onclick="bridgeResolve('${b.id}','${x.c.id}')"><div class="rb"><b>${esc(tenName(x.c))}${x.score>=2?' <span class="chip ok">هم‌مبلغ</span>':''}</b><small>${esc(propName(x.c))}، ${x.balance>0?'معوق '+nf(x.balance):'بدون معوق'}، اجاره ${nf(currentRent(x.c))}</small></div></button>`).join('')}</div>
-  <button class="btn" onclick="bridgeResolve('${b.id}',null)">مربوط به اجاره نیست (نادیده)</button>`);
-}
-
-// ---------------- v1.4: rent roll (status per tenant, last payment, next due, 8-month strip) ----------------
-function rentRoll(t){
-  const L=activeContracts();if(!L.length)return'';const ci=tIdx(t);
-  return `<h3 class="sec">وضعیت اجاره‌ها</h3><div class="list">${L.map(c=>{
-    const led=ledger(c,t);const bal=led.balance;const pays=paymentsOf(c.id);const lastP=pays[pays.length-1];
-    const nx=led.charges.find(x=>x.paid<x.amount&&!x.due)||led.charges.find(x=>x.idx>ci);
-    const chip=bal>0?`<span class="chip bad">بدهکار ${nf(bal)}</span>`:bal<0?`<span class="chip ok">پیش‌پرداخت ${nf(-bal)}</span>`:`<span class="chip ok">تسویه ✓</span>`;
-    return `<button class="row tap col" onclick="openStatement('${c.id}')"><div class="rtop" style="width:100%"><div class="rb"><b>${esc(tenName(c))} ${chip}</b>
-      <small>${esc(propName(c))} · اجاره ${nf(currentRent(c))}</small>
-      <small>آخرین پرداخت: ${lastP?fmtD(lastP.date)+' ('+nf(lastP.amount)+')':'—'}${nx?` · سررسید بعدی: ${fmtD(nx)}`:''}</small></div></div>
-      ${monthStrip(c,t,led)}</button>`;}).join('')}</div>${rollLegend()}`;
-}
-
-// ---------------- v1.6: one readable month strip for «امروز» and «املاک» ----------------
-// v1.7: the whole rent year (Farvardin…Esfand) in two rows of six; «this month» = bold name, no frame
-function monthStrip(c,t,led){
-  led=led||ledger(c,t);const ci=tIdx(t);const yr=Math.floor((ci-1)/12);   // year of the rent that is due now
-  const cells=[];for(let m=0;m<12;m++){const k=yr*12+m+1;cells.push(led.charges.find(x=>x.idx===k)||{idx:k,m:((k%12)+12)%12,status:'none',paid:0,amount:0});}
-  return `<div class="ygrid">${cells.map(x=>`<div class="mcell${x.idx===ci?' cur':''}"><span class="cell ${x.status}">${x.status==='prepaid'?'<i>+</i>':''}</span><em>${MFA[covM(x.idx)]}</em></div>`).join('')}</div>`;
-}
-function rollLegend(){
-  return `<p class="dim legend"><span class="cell paid"></span>پرداخت‌شده <span class="cell partial"></span>ناقص <span class="cell late"></span>پرداخت‌نشده <span class="cell upcoming"></span>آینده <span class="cell prepaid"><i>+</i></span>پیش‌پرداخت</p>
-    <p class="dim">نام هر خانه = ماهِ اجاره (سررسید: ماهِ بعد). نامِ <b>پررنگ</b> = اجاره‌ای که این ماه سررسید می‌شود.</p>`;
-}
-// ---------------- v1.6: choose which month a payment belongs to ----------------
-function openRetarget(pid,cid){
-  const p=byId(ST.payments,pid);const c=ctrOf(cid);if(!p||!c)return;const L=ledger(c);
-  openSheet(`${sheetHead('این پرداخت بابت کدام ماه است؟',nf(p.amount)+' تومان، '+fmtD(p.date))}
-  <div class="list"><button class="row tap" onclick="setTarget('${pid}','${cid}',null)"><div class="rb"><b>خودکار${p.target==null?' ✓':''}</b><small>نزدیک‌ترین سررسید به تاریخ پرداخت</small></div></button>
-  ${L.charges.map(x=>`<button class="row tap" onclick="setTarget('${pid}','${cid}',${x.idx})"><div class="rb"><b>اجارهٔ ${MFA[covM(x.idx)]} ${toFa(Math.floor((x.idx-1)/12))}${p.target===x.idx?' ✓':''}</b><small>${nf(x.amount)} — پرداخت‌شده ${nf(x.paid)}</small></div></button>`).join('')}</div>
-  <button class="btn" onclick="openStatement('${cid}')">بازگشت</button>`);
-}
-async function setTarget(pid,cid,idx){const p=byId(ST.payments,pid);if(!p)return;if(idx==null)delete p.target;else p.target=idx;await sv();render();openStatement(cid);ntf('ماهِ پرداخت به‌روز شد');}
-
-// ============================================================
-// CLOUD BACKUP (Firebase) — same project & same account as «سرمایه».
-// Storage: amlak_backups/{uid}. If the project's Firestore rules only
-// allow backups/{uid}, it falls back to the field `amlak` inside that doc
-// (merge write — Sarmaye v23.2 also writes with merge, so neither app can
-// erase the other's data). The path that worked is remembered.
-// The SDK loads lazily AFTER first paint, so offline start is never blocked.
-// ============================================================
-const FB_CONFIG={apiKey:"AIzaSyA-pHzeZ1SKLRADAkB5_QHtQ_UMfGNFxN8",authDomain:"finational-managment.firebaseapp.com",
-  projectId:"finational-managment",storageBucket:"finational-managment.firebasestorage.app",
-  messagingSenderId:"921977466990",appId:"1:921977466990:web:935b97252ea6ef4c06b67f"};
-const FB_SDK='https://www.gstatic.com/firebasejs/12.15.0/';
-let fbAuth=null,fbDb=null,fbReady=false,cloudTimer=null,cloudLast=null,cloudBusy=false;
-function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
-async function initFirebase(){
-  if(fbReady) return true;
-  try{
-    if(typeof firebase==='undefined'){
-      await loadScript(FB_SDK+'firebase-app-compat.js');
-      await Promise.all([loadScript(FB_SDK+'firebase-auth-compat.js'),loadScript(FB_SDK+'firebase-firestore-compat.js')]);
-    }
-    if(!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
-    fbAuth=firebase.auth();fbDb=firebase.firestore();fbReady=true;
-    fbAuth.onAuthStateChanged(u=>{if(u){cloudBackup(true);fetchBridge();}refreshCloudUI();});
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(cloudUser()||(typeof ghOn==='function'&&ghOn())))fetchBridge();});
-    fbAuth.getRedirectResult().catch(()=>{});
-    return true;
-  }catch(e){fbReady=false;return false;}
-}
-function fbErrMsg(e){
-  const map={'auth/email-already-in-use':'این ایمیل قبلاً ثبت‌نام کرده است؛ «ورود» را بزنید','auth/invalid-email':'ایمیل نامعتبر است',
-    'auth/weak-password':'رمز عبور باید حداقل ۶ کاراکتر باشد','auth/wrong-password':'رمز عبور اشتباه است','auth/user-not-found':'کاربری با این ایمیل یافت نشد',
-    'auth/invalid-credential':'ایمیل یا رمز عبور اشتباه است','auth/popup-closed-by-user':'پنجرهٔ ورود گوگل بسته شد',
-    'auth/unauthorized-domain':'این دامنه در Firebase مجاز نیست (Authorized domains)','auth/network-request-failed':'اتصال اینترنت برقرار نیست',
-    'permission-denied':'دسترسی به پایگاه داده رد شد'};
-  return map[e&&e.code]||(e&&e.message)||'خطای ناشناخته';
-}
-const cloudUser=()=>fbReady&&fbAuth?fbAuth.currentUser:null;
-function isDenied(e){return e&&(e.code==='permission-denied'||/permission/i.test(e.message||''));}
-// write: primary path, then fallback
-async function cloudWrite(payload){
-  const uid=cloudUser().uid;
-  if(ST.settings.cloudPath!=='field'){
-    try{await fbDb.collection('amlak_backups').doc(uid).set(payload);ST.settings.cloudPath='doc';return;}
-    catch(e){if(!isDenied(e))throw e;}
-  }
-  await fbDb.collection('backups').doc(uid).set({amlak:payload},{merge:true});ST.settings.cloudPath='field';
-}
-async function cloudRead(){
-  const uid=cloudUser().uid;
-  try{const d=await fbDb.collection('amlak_backups').doc(uid).get();if(d.exists&&d.data().data)return d.data();}
-  catch(e){if(!isDenied(e))throw e;}
-  const d=await fbDb.collection('backups').doc(uid).get();
-  return d.exists&&d.data().amlak?d.data().amlak:null;
-}
-async function cloudBackup(silent){
-  if(!cloudUser()||cloudBusy) return false;
-  cloudBusy=true;
-  try{
-    await cloudWrite({data:JSON.stringify(ST),appVersion:APP_VERSION,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-    cloudLast=Date.now();ST.settings.lastCloud=cloudLast;await sv(true);refreshCloudUI();
-    if(!silent)ntf('پشتیبان ابری ذخیره شد');return true;
-  }catch(e){if(!silent)ntf('پشتیبان ابری انجام نشد: '+fbErrMsg(e));return false;}
-  finally{cloudBusy=false;}
-}
-function scheduleCloud(){if(!cloudUser())return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>cloudBackup(true),6000);}
-async function cloudRestore(){
-  if(!cloudUser())return ntf('ابتدا وارد حساب شوید');
-  try{
-    const p=await cloudRead();if(!p)return ntf('پشتیبان ابری برای این حساب پیدا نشد');
-    const obj=JSON.parse(p.data);
-    if(!confirm('داده‌های فعلی این دستگاه با پشتیبان ابری جایگزین شود؟'))return;
-    await dbSet('state_before_cloud_restore',JSON.parse(JSON.stringify(ST)));
-    ST=normalize(obj);applyTheme();await sv(true);closeSheet();render();ntf('بازیابی از ابر انجام شد');
-  }catch(e){ntf('بازیابی ابری انجام نشد: '+fbErrMsg(e));}
-}
-async function cloudSignIn(mode){
-  if(!(await initFirebase()))return ntf('سرویس ابری در دسترس نیست؛ اتصال اینترنت را بررسی کنید');
-  try{
-    if(mode==='google'){
-      const pv=new firebase.auth.GoogleAuthProvider();
-      try{await fbAuth.signInWithPopup(pv);}
-      catch(e){if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'].includes(e.code)){await fbAuth.signInWithRedirect(pv);return;}throw e;}
-    }else{
-      const em=val('cl_em').trim(),pw=val('cl_pw');if(!em||!pw)return ntf('ایمیل و رمز عبور را وارد کنید');
-      if(mode==='up')await fbAuth.createUserWithEmailAndPassword(em,pw);else await fbAuth.signInWithEmailAndPassword(em,pw);
-    }
-    ntf('وارد شدید؛ پشتیبان ابری خودکار فعال شد');openSettings();
-  }catch(e){ntf(fbErrMsg(e));}
-}
-async function cloudSignOut(){if(fbAuth)await fbAuth.signOut();ntf('از حساب خارج شدید');openSettings();}
-function cloudSection(){
-  const u=cloudUser();
-  if(!fbReady) return `<p class="dim">اتصال به سرویس ابری برقرار نشد. با اتصال اینترنت دوباره تنظیمات را باز کنید.</p>`;
-  if(!u) return `<p class="dim">با همان حسابی که در «سرمایه» استفاده می‌کنید وارد شوید؛ پس از هر تغییر، پشتیبان خودکار در ابر ذخیره می‌شود.</p>
-    <button class="btn" onclick="cloudSignIn('google')">ورود با گوگل</button>
-    <div class="g2" style="margin-top:10px">${field('ایمیل','<input id="cl_em" type="email" dir="ltr" autocomplete="username">')}${field('رمز عبور','<input id="cl_pw" type="password" dir="ltr" autocomplete="current-password">')}</div>
-    <div class="acts"><button class="btn pri" onclick="cloudSignIn('in')">ورود</button><button class="btn" onclick="cloudSignIn('up')">ثبت‌نام</button></div>`;
-  const lc=ST.settings.lastCloud;
-  return `<p class="dim">حساب: <b dir="ltr">${esc(u.email||u.uid)}</b><br><span id="cl_last">${lc?'آخرین پشتیبان ابری: '+new Date(lc).toLocaleString('fa-IR'):'هنوز پشتیبان ابری ثبت نشده'}</span></p>
-    <div class="acts"><button class="btn pri" onclick="cloudBackup(false)">پشتیبان ابری الان</button><button class="btn" onclick="cloudRestore()">بازیابی از ابر</button></div>
-    <button class="btn" onclick="cloudSignOut()">خروج از حساب</button>`;
-}
-function refreshCloudUI(){const b=$('cloudbox');if(b)b.innerHTML=cloudSection();const l=$('hcloud');if(l)l.classList.toggle('on',!!cloudUser());}
-
-// Read rent deposits that «سرمایه» forwarded (backups/{uid}.amlakInbox), skip handled ones.
-async function fetchBridge(){
-  let inbox={};
-  try{
-    if(typeof ghOn==='function'&&ghOn()) inbox=(await ghInboxRead()).data.items||{};   // v1.3: GitHub (no VPN)
-    else if(cloudUser()){const d=await fbDb.collection('backups').doc(cloudUser().uid).get();inbox=(d.exists&&d.data().amlakInbox)||{};}
-    else return 0;
-    const fresh=Object.values(inbox).filter(it=>it&&it.id&&!ST.bridgeDone[it.id]&&!(ST.bridge||[]).some(b=>b.id===it.id));
-    if(!fresh.length)return 0;
-    ST.bridge=(ST.bridge||[]).concat(fresh).sort((a,b)=>cmpD(a.date,b.date));
-    await sv(true);if(TAB==='today')render();ntf(`🏦 ${toFa(fresh.length)} واریز جدید از «سرمایه»`);
-    return fresh.length;
-  }catch(e){return 0;}
-}
-async function bridgeResolve(id,contractId){
-  const b=(ST.bridge||[]).find(x=>x.id===id);if(!b)return;
-  try{
-    if(contractId&&b.kind==='deposit'){const c=ctrOf(contractId);
-      if(b.dir==='out')c.depReturned=b.date;else{c.depReceived=b.date;if(!c.deposit)c.deposit=b.a;}}
-    else if(contractId) addPayment({contractId,amount:b.a,date:b.date,method:'transfer',note:'پیامک '+(b.bank||'بانک')});
-    ST.bridgeDone[id]=Date.now();ST.bridge=ST.bridge.filter(x=>x.id!==id);
-    await sv();closeSheet();render();ntf(contractId?'پرداخت ثبت شد':'نادیده گرفته شد');
-    if(typeof ghOn==='function'&&ghOn()) ghInboxRemove(id).catch(()=>{});
-    if(cloudUser()) fbDb.collection('backups').doc(cloudUser().uid).update({['amlakInbox.'+id]:firebase.firestore.FieldValue.delete()}).catch(()=>{});
-  }catch(e){ntf(e.message);}
-}
 
 
 // ============================================================
@@ -1261,7 +620,7 @@ async function bridgeResolve(id,contractId){
 // Same repo/token as «سرمایه» works (different file). Config is device-only
 // (localStorage) — never inside ST or any backup. Each backup = one commit.
 // ============================================================
-const GH_KEY='amlak_gh_cfg',GH_LAST='amlak_gh_last',GH_FILE='amlak-backup.json';
+const GH_KEY='sarafi_gh_cfg',GH_LAST='sarafi_gh_last',GH_FILE='sarafi-backup.json';
 let ghTimer=null,ghBusy=false;
 function ghCfg(){try{return JSON.parse(localStorage.getItem(GH_KEY)||'{}')||{};}catch(e){return{};}}
 function ghOn(){const c=ghCfg();return !!(c.owner&&c.repo&&c.token);}
@@ -1271,7 +630,7 @@ async function ghKey(pass,salt,use){const km=await crypto.subtle.importKey('raw'
   return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:50000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,[use]);}
 async function ghEnc(obj,pass){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
   const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await ghKey(pass,salt,'encrypt'),new TextEncoder().encode(JSON.stringify(obj)));
-  return{amlakEnc:1,salt:b2s(salt),iv:b2s(iv),data:b2s(ct)};}
+  return{sarafiEnc:1,salt:b2s(salt),iv:b2s(iv),data:b2s(ct)};}
 async function ghDec(e,pass){const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:s2b(e.iv)},await ghKey(pass,s2b(e.salt),'decrypt'),s2b(e.data));return JSON.parse(new TextDecoder().decode(pt));}
 function ghFetch(path,opt){const c=ghCfg();opt=opt||{};
   const h={'Authorization':'Bearer '+c.token,'Accept':opt.accept||'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};if(opt.body)h['Content-Type']='application/json';
@@ -1281,48 +640,47 @@ async function ghBackup(silent){
   if(!ghOn()||ghBusy)return false;ghBusy=true;const c=ghCfg();
   try{const payload=JSON.stringify(c.pass?await ghEnc(ST,c.pass):ST);
     let sha;const g=await ghFetch('/contents/'+GH_FILE);if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)throw new Error(ghErr(g));
-    const t=today();const p=await ghFetch('/contents/'+GH_FILE,{method:'PUT',body:JSON.stringify({message:`املاک ${t.y}/${t.m+1}/${t.d} ${new Date().toTimeString().slice(0,5)} — ${APP_VERSION}`,content:b2s(new TextEncoder().encode(payload)),sha})});
+    const t=today();const p=await ghFetch('/contents/'+GH_FILE,{method:'PUT',body:JSON.stringify({message:`صرافی ${t.y}/${t.m+1}/${t.d} ${new Date().toTimeString().slice(0,5)} — ${APP_VERSION}`,content:b2s(new TextEncoder().encode(payload)),sha})});
     if(!p.ok)throw new Error(ghErr(p));
     localStorage.setItem(GH_LAST,String(Date.now()));const el=$('gh-status');if(el)el.textContent=ghStatusText();
     if(!silent)ntf('پشتیبان در GitHub ذخیره شد');return true;
   }catch(e){if(!silent)ntf('پشتیبان GitHub: '+(e.message||'اتصال برقرار نشد'));return false;}finally{ghBusy=false;}}
-// v1.3: «سرمایه» drops rent deposits into amlak-inbox.json in the same private repo
-async function ghInboxRead(){
-  const g=await ghFetch('/contents/amlak-inbox.json');if(g.status===404)return{sha:null,data:{items:{}}};
-  if(!g.ok)throw new Error(ghErr(g));const j=await g.json();let data={items:{}};
-  try{data=JSON.parse(new TextDecoder().decode(s2b(j.content.replace(/\n/g,''))));}catch(e){}
-  if(!data.items)data.items={};return{sha:j.sha,data};
+// v1.1 — bridge with «سرمایه» (same private repo)
+async function ghFileRead(file){const g=await ghFetch('/contents/'+file);if(g.status===404)return{sha:null,data:null};if(!g.ok)throw new Error(ghErr(g));
+  const j=await g.json();let data=null;try{data=JSON.parse(new TextDecoder().decode(s2b(j.content.replace(/\n/g,''))));}catch(e){}return{sha:j.sha,data};}
+async function ghFileWrite(file,obj,msg,sha){return ghFetch('/contents/'+file,{method:'PUT',body:JSON.stringify({message:msg,content:b2s(new TextEncoder().encode(JSON.stringify(obj))),sha:sha||undefined})});}
+async function fetchSfInbox(){
+  if(!ghOn())return 0;
+  try{const {data}=await ghFileRead('sarafi-inbox.json');const items=(data&&data.items)||{};let n=0;
+    Object.values(items).forEach(it=>{if(!ST.bridgeDone[it.id]&&!ST.bridge.some(b=>b.id===it.id)){ST.bridge.push(it);n++;}});
+    if(n){await sv();render();}return n;}catch(e){return 0;}
 }
-async function ghInboxRemove(id){
-  for(let i=0;i<3;i++){const {sha,data}=await ghInboxRead();if(!data.items[id])return true;delete data.items[id];
-    const p=await ghFetch('/contents/amlak-inbox.json',{method:'PUT',body:JSON.stringify({message:'صندوق املاک — ثبت شد',content:b2s(new TextEncoder().encode(JSON.stringify(data))),sha})});
-    if(p.ok)return true;if(p.status!==409&&p.status!==422)return false;}
+async function sfInboxRemove(id){
+  for(let i=0;i<3;i++){const {sha,data}=await ghFileRead('sarafi-inbox.json');if(!data||!data.items||!data.items[id])return true;delete data.items[id];
+    const p=await ghFileWrite('sarafi-inbox.json',data,'صندوق صرافی — ثبت شد',sha);if(p.ok)return true;if(p.status!==409&&p.status!==422)return false;}
   return false;
 }
+let pubTimer=null;
+async function publishStatus(){
+  if(!ghOn()||!bridgeReady())return false;const v=vault();
+  const st={target:bridgeTarget(),eur:v.eur,mkt:v.mkt,value:v.value,cost:v.cost,ready:true,at:Date.now()};
+  for(let i=0;i<3;i++){const {sha}=await ghFileRead('sarafi-status.json');const p=await ghFileWrite('sarafi-status.json',st,'وضعیت صرافی',sha);if(p.ok){try{localStorage.setItem('sarafi_pub',JSON.stringify({at:st.at,target:st.target}));}catch(e){}if(typeof TAB!=='undefined'&&TAB==='vault')render();return true;}if(p.status!==409&&p.status!==422)return false;}
+  return false;
+}
+function schedulePublish(){if(!ghOn())return;clearTimeout(pubTimer);pubTimer=setTimeout(()=>publishStatus().catch(()=>{}),20000);}
 function copyTok(id){const v=val(id);if(!v)return ntf('توکنی وارد نشده');
   (navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>ntf('توکن کپی شد؛ در اپ دیگر بچسبانید')).catch(()=>{const el=$(id);el.type='text';el.select();ntf('توکن را انتخاب و کپی کنید');});}
-function ghSchedule(){if(!ghOn())return;clearTimeout(ghTimer);ghTimer=setTimeout(()=>{ghBackup(true);ghDepPublish();},15000);}
-// v1.10: publish deposits held to amlak-status.json so «سرمایه» can compare with its own deposit records
-// (deposits collected by a partner are listed but not counted — they never reached your accounts)
-function depStatus(){const L=depositsHeld().map(c=>{const p=propOf(c.propertyId);const prt=!!(p&&p.collector==='partner');
-  return{n:tenName(c)+' — '+propName(c)+(prt?` (نزد ${p.partner||'شریک'}؛ در جمع نیست)`:''),dep:c.deposit,prt:prt?1:0};});
-  return{deposits:L.filter(x=>!x.prt).reduce((s,x)=>s+x.dep,0),list:L};}
-async function ghDepPublish(){
-  if(!ghOn())return false;const st=depStatus();const key=JSON.stringify(st);if(localStorage.getItem('amlak_dep_pub')===key)return true;
-  try{let sha;const g=await ghFetch('/contents/amlak-status.json');if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)return false;
-    const p=await ghFetch('/contents/amlak-status.json',{method:'PUT',body:JSON.stringify({message:'املاک — ودیعه‌ها',content:b2s(new TextEncoder().encode(JSON.stringify({v:1,at:Date.now(),...st}))),sha})});
-    if(p.ok){localStorage.setItem('amlak_dep_pub',key);return true;}}catch(e){}
-  return false;}
+function ghSchedule(){if(!ghOn())return;clearTimeout(ghTimer);ghTimer=setTimeout(()=>ghBackup(true),15000);}
 function ghStatusText(){if(!ghOn())return 'غیرفعال — بدون VPN کار می‌کند';const c=ghCfg();const l=+localStorage.getItem(GH_LAST)||0;
   return `فعال — ${c.owner}/${c.repo}${c.pass?'، رمزنگاری‌شده':''}؛ `+(l?'آخرین پشتیبان '+new Date(l).toLocaleString('fa-IR'):'هنوز پشتیبانی ثبت نشده');}
 function openGhSheet(){
-  let c=ghCfg();if(!c.token){try{const s=JSON.parse(localStorage.getItem('srm_gh_cfg')||'{}');if(s.token)c={owner:s.owner,repo:s.repo,token:s.token};}catch(e){}}
+  let c=ghCfg();if(!c.token){for(const k of ['srm_gh_cfg','amlak_gh_cfg']){try{const s=JSON.parse(localStorage.getItem(k)||'{}');if(s.token){c={owner:s.owner,repo:s.repo,token:s.token};break;}}catch(e){}}}
   openSheet(`${sheetHead('پشتیبان GitHub','بدون VPN؛ هر پشتیبان یک نسخه در تاریخچه')}
-  <details><summary class="dim" style="cursor:pointer">راهنمای یک‌باره</summary><p class="dim" style="line-height:2">همان ریپوی خصوصی و توکنی که برای «سرمایه» ساخته‌اید کافی است (املاک در فایل جداگانهٔ <code>amlak-backup.json</code> ذخیره می‌شود). اگر هنوز نساخته‌اید: ریپوی Private ← Fine-grained token فقط برای همان ریپو با Contents: Read and write.</p></details>
+  <details><summary class="dim" style="cursor:pointer">راهنمای یک‌باره</summary><p class="dim" style="line-height:2">همان ریپوی خصوصی و توکنی که برای «سرمایه» ساخته‌اید کافی است (صرافی در فایل جداگانهٔ <code>sarafi-backup.json</code> ذخیره می‌شود). اگر هنوز نساخته‌اید: ریپوی Private ← Fine-grained token فقط برای همان ریپو با Contents: Read and write.</p></details>
   ${field('نام کاربری GitHub',`<input id="gh-owner" dir="ltr" value="${esc(c.owner||'ahmadr59-ops')}">`)}
   ${field('نام ریپو',`<input id="gh-repo" dir="ltr" value="${esc(c.repo||'sarmaye-backup')}">`)}
   ${field('توکن دسترسی',`<input id="gh-token" type="password" dir="ltr" value="${esc(c.token||'')}">`,'فقط روی همین دستگاه ذخیره می‌شود')}
-  <button class="btn" onclick="copyTok('gh-token')">📋 کپی توکن (برای «سرمایه» و «صرافی»)</button>
+  <button class="btn" onclick="copyTok('gh-token')">📋 کپی توکن (برای «سرمایه» و «املاک»)</button>
   ${field('رمز رمزنگاری (اختیاری)',`<input id="gh-pass" type="password" dir="ltr" value="${esc(c.pass||'')}">`,'اگر فراموش شود، پشتیبان‌ها قابل بازیابی نیستند')}
   <button class="btn pri" onclick="saveGh()">ذخیره و آزمایش اتصال</button>
   <div class="acts"><button class="btn" onclick="ghBackup(false)">پشتیبان الان</button><button class="btn" onclick="ghHist()">نسخه‌ها و بازیابی</button></div>
@@ -1340,11 +698,11 @@ async function ghHist(){const b=$('gh-hist');b.innerHTML='<p class="dim">در ح
 async function ghRestore(sha){
   try{const r=await ghFetch('/contents/'+GH_FILE+'?ref='+sha,{accept:'application/vnd.github.raw+json'});if(!r.ok)throw new Error(ghErr(r));
     let d=JSON.parse(await r.text());
-    if(d.amlakEnc===1){const pass=ghCfg().pass||prompt('رمز رمزنگاری پشتیبان:');if(!pass)return;try{d=await ghDec(d,pass);}catch(e){return ntf('رمز اشتباه است');}}
-    if(!Array.isArray(d.properties)||!Array.isArray(d.contracts))return ntf('این نسخه فایل معتبر املاک نیست');
+    if(d.sarafiEnc===1){const pass=ghCfg().pass||prompt('رمز رمزنگاری پشتیبان:');if(!pass)return;try{d=await ghDec(d,pass);}catch(e){return ntf('رمز اشتباه است');}}
+    if(!Array.isArray(d.deals))return ntf('این نسخه فایل معتبر صرافی نیست');
     if(!confirm('داده‌های فعلی این دستگاه با این نسخه جایگزین شود؟'))return;
     await dbSet('state_before_gh_restore',JSON.parse(JSON.stringify(ST)));
-    ST=normalize(d);applyTheme();await sv(true);closeSheet();render();ntf('بازیابی از GitHub انجام شد');
+    ST=normalize(d);applyTheme();await sv();closeSheet();render();ntf('بازیابی از GitHub انجام شد');
   }catch(e){ntf('بازیابی GitHub: '+(e.message||'اتصال برقرار نشد'));}}
 
 </script>
